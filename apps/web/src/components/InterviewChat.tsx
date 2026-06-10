@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ResumeProfile } from "@talentloop/resume-parser";
+import type { JdRequirement } from "@talentloop/jd-parser";
 
 interface ChatTurn {
   role: "agent" | "user";
@@ -28,15 +30,8 @@ const SLOT_LABELS: Record<string, string> = {
   salaryExpectation: "Salary expectation",
 };
 
-export function InterviewChat({
-  personId,
-  jdId,
-  candidateName,
-}: {
-  personId: string;
-  jdId: string;
-  candidateName: string;
-}) {
+export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd: JdRequirement }) {
+  const candidateName = candidate.basics.name ?? candidate.id;
   const [state, setState] = useState<ChatState>({ history: [], profile: {}, done: false });
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [input, setInput] = useState("");
@@ -54,7 +49,7 @@ export function InterviewChat({
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ personId, jdId, ...payload }),
+          body: JSON.stringify({ candidate, jd, ...payload }),
         });
         const data = (await res.json()) as ChatResponse;
         if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
@@ -66,7 +61,7 @@ export function InterviewChat({
         setLoading(false);
       }
     },
-    [personId, jdId],
+    [candidate, jd],
   );
 
   useEffect(() => {

@@ -12,7 +12,7 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function OpportunityCard({ opp }: { opp: Opportunity }) {
+export function OpportunityCard({ opp, onOutreach }: { opp: Opportunity; onOutreach?: () => void }) {
   return (
     <article className="card">
       <div className="card-top">
@@ -30,9 +30,16 @@ export function OpportunityCard({ opp }: { opp: Opportunity }) {
         ))}
       </ul>
 
-      <a className="cta" href={`/interview/${opp.personId}?jd=${opp.jdId}`}>
-        Start AI pre-screening →
-      </a>
+      <div className="card-actions">
+        {onOutreach && (
+          <button className="cta" onClick={onOutreach}>
+            ✉ Outreach message
+          </button>
+        )}
+        <a className="cta secondary" href={`/interview/${opp.personId}?jd=${opp.jdId}`}>
+          AI pre-screening →
+        </a>
+      </div>
     </article>
   );
 }

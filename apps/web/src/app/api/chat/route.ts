@@ -1,27 +1,33 @@
 import { NextResponse } from "next/server";
 import { ChatState } from "@talentloop/chat-extractor";
-import { findJd, findResume } from "@/lib/data";
+import type { ResumeProfile } from "@talentloop/resume-parser";
+import type { JdRequirement } from "@talentloop/jd-parser";
 import { buildInterviewer } from "@/lib/interview";
 
 /**
- * Stateless chat endpoint: the client holds the conversation state and sends
- * it with every turn, so this works on serverless without any session store.
+ * Stateless chat endpoint: the client owns the talent pool (local-first)
+ * and the conversation state, and sends both with every turn — works on
+ * serverless with no session store and no server-side candidate database.
  *
- * POST { personId, jdId }                  → opening message + fresh state
- * POST { personId, jdId, state, message }  → next turn
+ * POST { candidate, jd }                  → opening message + fresh state
+ * POST { candidate, jd, state, message }  → next turn
  */
 export async function POST(req: Request): Promise<NextResponse> {
-  let body: { personId?: string; jdId?: string; state?: ChatState; message?: string };
+  let body: {
+    candidate?: ResumeProfile;
+    jd?: JdRequirement;
+    state?: ChatState;
+    message?: string;
+  };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const candidate = body.personId ? findResume(body.personId) : undefined;
-  const jd = body.jdId ? findJd(body.jdId) : undefined;
-  if (!candidate || !jd) {
-    return NextResponse.json({ error: "Unknown candidate or job" }, { status: 404 });
+  const { candidate, jd } = body;
+  if (!candidate?.id || !jd?.id || !jd.title) {
+    return NextResponse.json({ error: "Provide { candidate, jd }" }, { status: 400 });
   }
 
   const { extractor, context, mode } = buildInterviewer(candidate, jd);
