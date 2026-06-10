@@ -5,12 +5,15 @@
   "description": "AI recruiting toolkit: resume/JD parsing, reverse talent-pool matching, conversational extraction. Built for small and mid-sized companies, GDPR-first.",
   "workspaces": [
     "packages/*",
-    "examples"
+    "examples",
+    "apps/*"
   ],
   "scripts": {
     "build": "tsc -b",
     "clean": "tsc -b --clean",
-    "demo": "npm run build && node examples/dist/match-demo.js"
+    "demo": "npm run build && node examples/dist/match-demo.js",
+    "web": "npm run build && npm run dev --workspace @talentloop/web",
+    "web:build": "npm run build && npm run build --workspace @talentloop/web"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

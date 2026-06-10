@@ -122,9 +122,27 @@ export class TwoStageExtractor {
     }
     const done = extracted.done || this.cfg.slots.every((s) => s.key in profile);
 
+    // The dialogue stage ran before extraction, so on the final turn it may
+    // still have asked another question. Regenerate a proper closing instead.
+    let finalReply = reply;
+    if (done && missing.length > 0) {
+      finalReply = await this.llm.complete(
+        [
+          `Goal: ${this.cfg.goal}`,
+          `Everything needed has now been learned: ${JSON.stringify(profile)}`,
+          `Still to learn (ask at most ONE per turn, in this order): nothing — wrap up warmly`,
+          `Conversation so far:`,
+          renderTranscript(history.slice(0, -1)),
+          `Respond as the agent: thank them warmly, confirm a human will follow up, and close. Plain text only, no further questions.`,
+        ].join("\n\n"),
+        { system: this.cfg.persona, temperature: this.cfg.dialogueTemperature ?? 0.7 },
+      );
+      history[history.length - 1] = { role: "agent", text: finalReply };
+    }
+
     return {
-      reply,
-      quickReplies: extracted.quickReplies ?? [],
+      reply: finalReply,
+      quickReplies: done ? [] : (extracted.quickReplies ?? []),
       state: { history, profile, done },
     };
   }

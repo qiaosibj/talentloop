@@ -10,10 +10,13 @@ AI recruiting toolkit for small and mid-sized companies: structured resume/JD pa
 
 ```bash
 npm install
-npm run demo     # builds and runs the reactivation board demo — no API key needed
+npm run demo     # CLI demo: builds and prints the reactivation board — no API key needed
+npm run web      # Web app at http://localhost:3100 — board + AI pre-screening chat
 ```
 
-The demo indexes 8 synthetic candidates against 5 open positions and prints a reactivation board: every candidate's best opportunity, classified as **optimal** (contact first), **probe** (worth a try) or **explore** (long shot).
+The demo indexes 8 synthetic candidates against 5 open positions and produces a reactivation board: every candidate's best opportunity, classified as **optimal** (contact first), **probe** (worth a try) or **explore** (long shot).
+
+The web app adds an **AI pre-screening interview**: click any opportunity card to see the candidate-side chat. Without an API key it runs a scripted demo conversation; set `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY` + `OPENAI_MODEL`) for a real AI interviewer. Either way the right-hand panel shows the structured profile filling live — that is what the recruiter receives.
 
 ## Packages
 
@@ -39,16 +42,21 @@ The demo indexes 8 synthetic candidates against 5 open positions and prints a re
 
 ```
 packages/        core, resume-parser, jd-parser, match-engine, chat-extractor
+apps/web/        Next.js app: reactivation board + AI pre-screening chat
 examples/        runnable demos (offline)
 data/synthetic/  generated sample candidates & jobs — no real personal data
 docs/            architecture & design notes
 ```
 
+## Deploy (Vercel)
+
+Import the repo, set **Root Directory** to `apps/web` (keep "Include files outside root" on). The build script compiles the workspace packages first. Optionally add `ANTHROPIC_API_KEY` as an environment variable to enable the real AI interviewer.
+
 ## Roadmap
 
+- [x] Web app: reactivation board + AI pre-screening interview
 - [ ] pgvector-backed `VectorStore`
 - [ ] Synthetic data generator (LLM-generated multilingual resume & JD corpus)
-- [ ] Web app: reactivation board + AI pre-screening interview links
 - [ ] Hybrid RAG package (multi-route retrieval, citation verification, canonical-answer overrides)
 
 ## License
