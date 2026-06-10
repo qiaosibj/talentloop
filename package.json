@@ -2,7 +2,7 @@
   "name": "talentloop",
   "version": "0.1.0",
   "private": true,
-  "description": "AI recruiting toolkit: resume/JD parsing, reverse talent-pool matching, conversational extraction. Built for the German SME market, GDPR-first.",
+  "description": "AI recruiting toolkit: resume/JD parsing, reverse talent-pool matching, conversational extraction. Built for small and mid-sized companies, GDPR-first.",
   "workspaces": [
     "packages/*",
     "examples"

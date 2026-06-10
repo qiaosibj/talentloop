@@ -26,19 +26,19 @@ JD text ─────▶ jd-parser ──────▶ JdRequirement ──�
 | primary | intention + latest role (+ inferred tendency) | likely *active* interest |
 | full | entire history, education, certifications | plausible, more speculative |
 
-**Scoring: M × A**
+**Two scores per candidate-job pair**
 
-- **Fit (M)** — semantic, mustHave, skills, experienceFit, educationFit, intentFit
-- **Attraction (A)** — salary, benefits, level, location, brand, industry
-- Weights vary by job category (blue-collar / sales / technical / general); missing data scores neutral 0.5 — absence of information must never punish or reward.
+- **Job fit** — could this person do the job? Combines: overall content similarity, hard requirements met, skill overlap, how closely past roles match, education level, and whether the person's stated goal points at this job.
+- **Offer appeal** — would this job interest this person? Combines: salary vs. expectation, benefits, seniority, location, employer brand, and industry preference.
+- How much each factor counts depends on the job category (blue-collar / sales / technical / general). When information is missing, that factor scores neutral — absence of information must never punish or reward a candidate.
 
-**Tiers**
+**Result tiers**
 
-- `optimal` — M ≥ floor, A ≥ floor, has work history, **and** at least one strong fit signal `max(semantic, experienceFit, intentFit) ≥ optimalFitFloor`
-- `probe` — plausible; cheap outreach to test interest
-- `explore` — reachable only via AI-inferred career directions
+- `optimal` (contact first) — good fit **and** an appealing offer **and** real work history **and** at least one strong, specific signal: a closely matching recent role, a stated goal that points at this job, or high content similarity
+- `probe` (worth a try) — plausible; cheap outreach to test interest
+- `explore` (long shot) — reachable only via AI-inferred career directions
 
-The strong-signal gate exists because two failure modes are symmetric: a weighted average alone promotes keyword lookalikes with no real experience; a pure semantic floor kills candidates whose embedding similarity is mediocre but whose role history matches the job exactly.
+The "one strong signal" rule exists because two failure modes are symmetric: averaging everything promotes keyword lookalikes with no real experience, while relying purely on text similarity rejects candidates whose similarity score is mediocre but whose actual role history matches the job exactly.
 
 **Role-tendency inference.** Resumes with work descriptions but no job titles (common in blue-collar pools) get an LLM inference pass. The result lives in `derived` with `source: "ai-inferred"` — never merged into source data.
 
@@ -46,7 +46,7 @@ The strong-signal gate exists because two failure modes are symmetric: a weighte
 
 `chat-extractor` implements the two-stage pattern: a ~0.7-temperature dialogue call (natural conversation, persona-driven, one question per turn, easy → sensitive ordering) plus a separate ~0.2-temperature extraction call over the transcript that emits slots, quick replies and a done flag. One combined call reliably degrades both the conversation and the JSON. Slot merging is cumulative and **conversation overrides stored data** — the person talking now outranks a stale resume.
 
-## Compliance posture (DE/EU)
+## Compliance posture (EU)
 
 - GDPR: provenance tags, consent/retention designed as product features (Phase 2), synthetic data only in the repo.
 - EU AI Act: recruiting AI is high-risk → the engine **ranks and explains, humans decide**. No auto-rejection anywhere.
