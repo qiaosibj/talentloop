@@ -1,0 +1,13 @@
+{
+  "name": "@talentloop/examples",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/match-demo.js",
+  "dependencies": {
+    "@talentloop/core": "*",
+    "@talentloop/jd-parser": "*",
+    "@talentloop/match-engine": "*",
+    "@talentloop/resume-parser": "*"
+  },
+  "license": "MIT"
+}

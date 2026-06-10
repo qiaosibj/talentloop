@@ -1,0 +1,11 @@
+{
+  "name": "@talentloop/chat-extractor",
+  "version": "0.1.0",
+  "description": "Two-stage conversational extraction: a natural dialogue call plus a separate low-temperature JSON extraction call, with cumulative slot filling.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@talentloop/core": "*"
+  },
+  "license": "MIT"
+}

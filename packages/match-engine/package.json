@@ -1,0 +1,13 @@
+{
+  "name": "@talentloop/match-engine",
+  "version": "0.1.0",
+  "description": "Reverse talent-pool matching: dual-portrait embeddings, multi-dimensional fit/attraction scoring, three-tier opportunity classification.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@talentloop/core": "*",
+    "@talentloop/jd-parser": "*",
+    "@talentloop/resume-parser": "*"
+  },
+  "license": "MIT"
+}

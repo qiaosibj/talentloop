@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../packages/core" },
+    { "path": "../packages/resume-parser" },
+    { "path": "../packages/jd-parser" },
+    { "path": "../packages/match-engine" }
+  ]
+}

@@ -1,0 +1,81 @@
+[
+  {
+    "id": "jd_cnc",
+    "title": "CNC Machinist / Industriemechaniker (m/w/d)",
+    "company": "Präzisionstechnik Süd GmbH",
+    "category": "blue-collar",
+    "location": "München",
+    "industry": "machinery",
+    "mustHave": [
+      { "type": "experience-years", "value": "3" },
+      { "type": "certification", "value": "Facharbeiterbrief" },
+      { "type": "skill", "value": "cnc milling" }
+    ],
+    "niceToHave": ["5-axis experience", "CMM measurement"],
+    "skills": ["cnc milling", "cnc turning", "technical drawings", "siemens sinumerik"],
+    "responsibilities": ["Set up and operate CNC machining centers", "First-article inspection", "Preventive maintenance"],
+    "offer": { "salaryMin": 46000, "salaryMax": 54000, "currency": "EUR", "benefits": ["30 days vacation", "shift bonus", "company pension", "Jobrad"], "level": "Facharbeiter" }
+  },
+  {
+    "id": "jd_sales",
+    "title": "Sales Manager DACH (m/w/d)",
+    "company": "CloudTools SE",
+    "category": "sales",
+    "location": "Berlin",
+    "industry": "software",
+    "mustHave": [
+      { "type": "experience-years", "value": "5" },
+      { "type": "language", "value": "German" }
+    ],
+    "niceToHave": ["SaaS background", "enterprise deals"],
+    "skills": ["b2b sales", "outbound", "negotiation", "salesforce"],
+    "responsibilities": ["Own DACH enterprise pipeline", "Close new business", "Forecast in CRM"],
+    "offer": { "salaryMin": 70000, "salaryMax": 90000, "currency": "EUR", "benefits": ["uncapped commission", "remote-friendly", "stock options"], "level": "Senior", "brand": "Fast-growing European SaaS" }
+  },
+  {
+    "id": "jd_frontend",
+    "title": "Frontend Developer React (m/w/d)",
+    "company": "FinTech Berlin AG",
+    "category": "technical",
+    "location": "Berlin",
+    "industry": "fintech",
+    "mustHave": [
+      { "type": "experience-years", "value": "3" },
+      { "type": "skill", "value": "react" },
+      { "type": "skill", "value": "typescript" }
+    ],
+    "niceToHave": ["design systems", "Next.js"],
+    "skills": ["react", "typescript", "css", "testing", "rest apis"],
+    "responsibilities": ["Build customer-facing banking UI", "Own component library", "Pair with designers"],
+    "offer": { "salaryMin": 65000, "salaryMax": 78000, "currency": "EUR", "benefits": ["visa sponsorship", "learning budget", "hybrid work"], "level": "Mid/Senior" }
+  },
+  {
+    "id": "jd_warehouse",
+    "title": "Warehouse Operative / Lagerist (m/w/d)",
+    "company": "NordLog GmbH",
+    "category": "blue-collar",
+    "location": "Leipzig",
+    "industry": "logistics",
+    "mustHave": [{ "type": "certification", "value": "forklift licence" }],
+    "niceToHave": ["scanner experience", "shift flexibility"],
+    "skills": ["forklift", "picking", "inventory"],
+    "responsibilities": ["Picking and packing", "Goods receipt", "Cycle counts"],
+    "offer": { "salaryMin": 29000, "salaryMax": 33000, "currency": "EUR", "benefits": ["shift bonus", "permanent contract"], "level": "Operative" }
+  },
+  {
+    "id": "jd_hvac",
+    "title": "Maintenance Technician HVAC (m/w/d)",
+    "company": "Facility Partners Rhein-Main",
+    "category": "blue-collar",
+    "location": "Frankfurt",
+    "industry": "facility management",
+    "mustHave": [
+      { "type": "experience-years", "value": "3" },
+      { "type": "skill", "value": "hvac maintenance" }
+    ],
+    "niceToHave": ["Kälteschein", "driving licence B"],
+    "skills": ["hvac maintenance", "fault diagnosis", "preventive maintenance", "refrigerant handling"],
+    "responsibilities": ["Service HVAC installations across client sites", "Fault diagnosis and repair", "Maintenance documentation"],
+    "offer": { "salaryMin": 42000, "salaryMax": 48000, "currency": "EUR", "benefits": ["company van", "30 days vacation", "overtime paid"], "level": "Technician" }
+  }
+]

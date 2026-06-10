@@ -1,0 +1,8 @@
+{
+  "name": "@talentloop/core",
+  "version": "0.1.0",
+  "description": "Shared primitives: LLM client abstraction, embedders, vector math and in-memory vector store.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT"
+}

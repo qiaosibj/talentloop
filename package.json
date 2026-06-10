@@ -1,0 +1,20 @@
+{
+  "name": "talentloop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI recruiting toolkit: resume/JD parsing, reverse talent-pool matching, conversational extraction. Built for the German SME market, GDPR-first.",
+  "workspaces": [
+    "packages/*",
+    "examples"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean",
+    "demo": "npm run build && node examples/dist/match-demo.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT"
+}

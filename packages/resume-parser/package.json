@@ -1,0 +1,11 @@
+{
+  "name": "@talentloop/resume-parser",
+  "version": "0.1.0",
+  "description": "Resume text → structured profile, with AI role-tendency inference for resumes that lack job titles.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@talentloop/core": "*"
+  },
+  "license": "MIT"
+}

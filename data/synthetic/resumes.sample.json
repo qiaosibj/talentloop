@@ -1,0 +1,160 @@
+[
+  {
+    "id": "cand_markus",
+    "basics": { "name": "Markus Weber", "location": "München", "languages": ["German (native)", "English (B1)"] },
+    "experiences": [
+      {
+        "title": "Industriemechaniker",
+        "company": "Bayerische Maschinenbau GmbH",
+        "startDate": "2019-03",
+        "endDate": "present",
+        "description": "CNC milling and turning of precision parts, setup of 3- and 5-axis machines, quality inspection with CMM, maintenance of production line."
+      },
+      {
+        "title": "Zerspanungsmechaniker",
+        "company": "Metallwerk Augsburg",
+        "startDate": "2015-08",
+        "endDate": "2019-02",
+        "description": "Operated CNC lathes, read technical drawings, tool changes and basic programming (Siemens Sinumerik)."
+      }
+    ],
+    "education": [{ "degree": "Ausbildung", "field": "Industriemechaniker", "institution": "IHK Schwaben", "year": "2015" }],
+    "skills": ["cnc milling", "cnc turning", "siemens sinumerik", "technical drawings", "quality inspection"],
+    "certifications": ["IHK Facharbeiterbrief Industriemechaniker"],
+    "intention": { "roles": ["CNC Machinist", "Industriemechaniker"], "salaryMin": 44000, "currency": "EUR", "locations": ["München"] }
+  },
+  {
+    "id": "cand_anna",
+    "basics": { "name": "Anna Schmidt", "location": "Berlin", "languages": ["German (native)", "English (C1)"] },
+    "experiences": [
+      {
+        "title": "Senior Sales Manager",
+        "company": "SaaS Startup (Series B)",
+        "startDate": "2021-01",
+        "endDate": "present",
+        "description": "Full-cycle B2B sales for the DACH region, built outbound pipeline, closed enterprise deals averaging 80k EUR ACV, exceeded quota three years running."
+      },
+      {
+        "title": "Account Executive",
+        "company": "Software AG Reseller",
+        "startDate": "2017-05",
+        "endDate": "2020-12",
+        "description": "Mid-market software sales, demos, contract negotiation, CRM hygiene in Salesforce."
+      }
+    ],
+    "education": [{ "degree": "Bachelor", "field": "Business Administration", "institution": "HU Berlin", "year": "2017" }],
+    "skills": ["b2b sales", "outbound", "salesforce", "negotiation", "saas"],
+    "intention": { "roles": ["Sales Manager", "Head of Sales DACH"], "salaryMin": 75000, "currency": "EUR", "locations": ["Berlin", "remote"] }
+  },
+  {
+    "id": "cand_pavel",
+    "basics": { "name": "Pavel Novák", "location": "Leipzig", "workPermit": "EU citizen", "languages": ["Czech (native)", "German (B2)"] },
+    "experiences": [
+      {
+        "title": "Lagerist",
+        "company": "Logistikzentrum Leipzig",
+        "startDate": "2020-06",
+        "endDate": "present",
+        "description": "Warehouse picking and packing, forklift operation, goods receipt with scanner, inventory counts, shift work."
+      }
+    ],
+    "education": [],
+    "skills": ["forklift", "picking", "inventory", "scanner systems", "shift work"],
+    "certifications": ["Staplerschein (forklift licence)"],
+    "intention": { "roles": ["Lagerist", "Warehouse Operative"], "salaryMin": 30000, "currency": "EUR", "locations": ["Leipzig"] }
+  },
+  {
+    "id": "cand_liwei",
+    "basics": { "name": "Li Wei", "location": "Berlin", "workPermit": "EU Blue Card", "languages": ["Chinese (native)", "English (C1)", "German (B1)"] },
+    "experiences": [
+      {
+        "title": "Frontend Developer",
+        "company": "E-commerce scale-up",
+        "startDate": "2022-04",
+        "endDate": "present",
+        "description": "Built React + TypeScript storefront, performance optimization (Core Web Vitals), design system components, worked in cross-functional squad."
+      },
+      {
+        "title": "Web Developer",
+        "company": "Agency Shanghai",
+        "startDate": "2018-07",
+        "endDate": "2022-01",
+        "description": "Vue and React projects for retail clients, REST integration, responsive layouts."
+      }
+    ],
+    "education": [{ "degree": "Bachelor", "field": "Computer Science", "institution": "Tongji University", "year": "2018" }],
+    "skills": ["react", "typescript", "vue", "css", "performance optimization", "rest apis"],
+    "intention": { "roles": ["Frontend Developer", "Frontend Engineer"], "salaryMin": 62000, "currency": "EUR", "locations": ["Berlin"], "industries": ["e-commerce", "software"] }
+  },
+  {
+    "id": "cand_sofia",
+    "basics": { "name": "Sofía García", "location": "Hamburg", "workPermit": "EU citizen", "languages": ["Spanish (native)", "German (C1)", "English (C1)"] },
+    "experiences": [
+      {
+        "title": "Customer Support Specialist",
+        "company": "Travel platform",
+        "startDate": "2021-09",
+        "endDate": "2024-11",
+        "description": "Handled tier-1 and tier-2 support tickets in three languages, refund workflows, Zendesk macros, CSAT 4.8/5."
+      }
+    ],
+    "education": [{ "degree": "Bachelor", "field": "Tourism", "institution": "Universidad de Sevilla", "year": "2019" }],
+    "skills": ["customer support", "zendesk", "refunds", "multilingual support"],
+    "intention": { "roles": ["Customer Support", "Customer Success"], "salaryMin": 38000, "currency": "EUR", "locations": ["Hamburg", "remote"] }
+  },
+  {
+    "id": "cand_jonas",
+    "basics": { "name": "Jonas Becker", "location": "Frankfurt", "languages": ["German (native)"] },
+    "experiences": [
+      {
+        "company": "Self-employed / various contractors",
+        "startDate": "2016-01",
+        "endDate": "present",
+        "description": "Installed and repaired heating, ventilation and air-conditioning systems in residential and small commercial buildings. Diagnosed compressor faults, replaced refrigerant lines, performed annual maintenance contracts, coordinated with electricians on site."
+      }
+    ],
+    "education": [],
+    "skills": ["hvac maintenance", "refrigerant handling", "fault diagnosis", "customer site work"],
+    "derived": {
+      "roleTendency": ["HVAC Technician", "Maintenance Technician", "Kälteanlagenbauer"],
+      "skills": ["hvac installation", "compressor repair", "preventive maintenance"],
+      "industries": ["building services", "facility management"],
+      "source": "ai-inferred"
+    },
+    "intention": { "salaryMin": 40000, "currency": "EUR", "locations": ["Frankfurt"] }
+  },
+  {
+    "id": "cand_elena",
+    "basics": { "name": "Elena Petrova", "location": "Düsseldorf", "workPermit": "§18a residence permit", "languages": ["Bulgarian (native)", "German (B2)", "English (B2)"] },
+    "experiences": [
+      {
+        "title": "Pflegehelferin",
+        "company": "Seniorenheim Düsseldorf",
+        "startDate": "2022-02",
+        "endDate": "present",
+        "description": "Basic nursing care for elderly residents, documentation, support of registered nurses, medication handling under supervision."
+      }
+    ],
+    "education": [{ "degree": "Vocational nursing diploma", "field": "Nursing", "institution": "Medical College Sofia", "year": "2014" }],
+    "skills": ["elderly care", "care documentation", "medication handling"],
+    "certifications": ["Anerkennung als Pflegefachkraft (in progress)"],
+    "intention": { "roles": ["Pflegefachkraft", "Pflegehelferin"], "salaryMin": 36000, "currency": "EUR", "locations": ["Düsseldorf", "Köln"] }
+  },
+  {
+    "id": "cand_thomas",
+    "basics": { "name": "Thomas Müller", "location": "Frankfurt", "languages": ["German (native)", "English (B2)"] },
+    "experiences": [
+      {
+        "title": "Senior Accountant",
+        "company": "Mittelstand manufacturing group",
+        "startDate": "2014-04",
+        "endDate": "present",
+        "description": "Monthly and annual closings under HGB, DATEV bookkeeping, VAT returns, liaison with auditors, supervised two junior accountants."
+      }
+    ],
+    "education": [{ "degree": "Diplom", "field": "Betriebswirtschaftslehre", "institution": "Goethe-Universität Frankfurt", "year": "2008" }],
+    "skills": ["datev", "hgb closings", "vat returns", "payroll liaison", "excel"],
+    "certifications": ["Bilanzbuchhalter IHK"],
+    "intention": { "roles": ["Senior Accountant", "Leiter Buchhaltung"], "salaryMin": 68000, "currency": "EUR", "locations": ["Frankfurt"] }
+  }
+]

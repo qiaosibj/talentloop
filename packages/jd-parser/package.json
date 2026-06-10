@@ -1,0 +1,11 @@
+{
+  "name": "@talentloop/jd-parser",
+  "version": "0.1.0",
+  "description": "Job description text → structured requirements and offer attributes, with category classification for weight profiles.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@talentloop/core": "*"
+  },
+  "license": "MIT"
+}
