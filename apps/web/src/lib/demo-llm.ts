@@ -21,9 +21,11 @@ export class DemoLlm implements LlmClient {
 
   private opening(prompt: string): string {
     const firstQuestion = prompt.match(/ask the FIRST question only \("([^"]+)"\)/)?.[1] ?? "your current situation";
+    const background = prompt.match(/Background: ([^.\n]+)/)?.[1]?.trim();
     return (
-      `Hi! Thanks for taking a moment. A while back you were in touch with us, and a role just opened up that looks like a genuinely good match for your background — so I wanted to reconnect. ` +
-      `No pressure at all. To start: how would you describe ${lower(firstQuestion)} at the moment?`
+      `Hi! Thanks for taking a moment. You were in touch with us a while back, and a position just opened up that looks like a genuinely strong match` +
+      (background ? ` for someone with your background as ${background}` : ` for your background`) +
+      ` — I'd love to tell you more about it as we chat. No pressure at all. To start: how would you describe ${lower(firstQuestion)} right now?`
     );
   }
 
@@ -33,7 +35,10 @@ export class DemoLlm implements LlmClient {
     if (!next || stillToLearn.startsWith("nothing")) {
       return "That's everything I needed — thank you! I'll pass this along to the hiring team and you'll hear back within two working days. Have a great day!";
     }
-    return `Got it, that's really helpful — thanks for sharing. One more thing: could you tell me about ${lower(next)}?`;
+    const userTurns = (prompt.match(/^User: /gm) ?? []).length;
+    const ack = ACKS[(userTurns - 1 + ACKS.length) % ACKS.length];
+    const ask = ASK_PHRASES[userTurns % ASK_PHRASES.length];
+    return `${ack} ${ask} ${lower(next)}?`;
   }
 
   private extract(prompt: string): string {
@@ -60,8 +65,25 @@ export class DemoLlm implements LlmClient {
 const QUICK_REPLIES: string[][] = [
   ["Open to opportunities", "Happily employed, but curious", "Actively looking"],
   ["Same role as before", "I've changed roles since", "Currently between jobs"],
+  ["A project I led recently", "Hit my targets this year", "Rather keep that for later"],
   ["Full-time only", "Open to flexible hours", "Remote would be ideal"],
   ["Similar to my last salary", "Looking for a step up", "Depends on the package"],
+];
+
+const ACKS = [
+  "Got it — that's really helpful, thanks.",
+  "That makes sense, appreciate the detail.",
+  "Nice — that's genuinely impressive.",
+  "Understood, good to know.",
+  "Perfect, thanks for being open about that.",
+];
+
+const ASK_PHRASES = [
+  "One more thing: could you tell me about",
+  "Next up — what about",
+  "I'd also love to hear about",
+  "And lastly, may I ask about",
+  "Could you also share",
 ];
 
 function lower(s: string): string {

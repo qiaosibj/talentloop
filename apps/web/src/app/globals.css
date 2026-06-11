@@ -968,3 +968,130 @@ select {
 .entity-main.clickable:hover .details-hint {
   color: var(--accent);
 }
+
+/* ---------- chat progress & job capsule ---------- */
+.chat-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-600);
+}
+
+.progress-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.progress-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-soft);
+  border: 1px solid var(--line);
+}
+
+.progress-dots .dot.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.job-capsule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 18px 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--line);
+  background: var(--gray-soft);
+  color: var(--ink-600);
+  font-size: 13px;
+}
+
+.job-capsule strong {
+  display: block;
+  color: var(--ink-900);
+  font-size: 13.5px;
+}
+
+.capsule-sub {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-400);
+  margin-top: 2px;
+}
+
+.capsule-lock {
+  font-size: 20px;
+}
+
+.job-capsule > div {
+  flex: 1;
+}
+
+.badge-new {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.job-capsule.unlocked {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  animation: capsule-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes capsule-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(14, 124, 107, 0.25); }
+  50% { box-shadow: 0 0 0 7px rgba(14, 124, 107, 0); }
+}
+
+.job-capsule.applied {
+  animation: none;
+  border-color: #86efac;
+  background: var(--green-soft);
+}
+
+.badge-applied {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+/* ---------- freshness badges ---------- */
+.badge-fresh {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge-fresh.engaged {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-fresh.applied {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.engagement-box {
+  background: var(--green-soft);
+  border-radius: 10px;
+  padding: 12px 14px;
+}

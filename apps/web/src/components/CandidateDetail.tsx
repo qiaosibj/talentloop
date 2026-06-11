@@ -1,14 +1,39 @@
-import type { ResumeProfile } from "@talentloop/resume-parser";
+import type { PoolCandidate } from "@/lib/store";
 
 function fmtRange(start?: string, end?: string): string {
   if (!start && !end) return "";
   return `${start ?? "?"} – ${end === "present" ? "now" : (end ?? "?")}`;
 }
 
-export function CandidateDetail({ candidate }: { candidate: ResumeProfile }) {
+const ANSWER_LABELS: Record<string, string> = {
+  jobStatus: "Job-search status",
+  currentWork: "Current role",
+  experienceHighlight: "Recent highlight",
+  hardRequirements: "Practical requirements",
+  salaryExpectation: "Salary expectation",
+};
+
+export function CandidateDetail({ candidate }: { candidate: PoolCandidate }) {
   const b = candidate.basics;
   return (
     <div className="detail">
+      {candidate.engagement && (
+        <section className="detail-section engagement-box">
+          <h4>
+            {candidate.engagement.status === "applied" ? "🎉 Applied" : "💬 Engaged via conversation"}
+            <span className="muted-inline">
+              {" "}
+              · {candidate.engagement.jdTitle} · {new Date(candidate.engagement.at).toLocaleString()}
+            </span>
+          </h4>
+          <div className="detail-grid">
+            {Object.entries(candidate.engagement.answers).map(([k, v]) => (
+              <Field key={k} label={ANSWER_LABELS[k] ?? k} value={v} />
+            ))}
+          </div>
+          <p className="muted small">Conversation data overrides resume data in matching (e.g. salary expectation).</p>
+        </section>
+      )}
       <section className="detail-section">
         <h4>Basics</h4>
         <div className="detail-grid">

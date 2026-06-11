@@ -16,10 +16,12 @@ export function OpportunityCard({
   opp,
   onOutreach,
   onDetails,
+  engagementStatus,
 }: {
   opp: Opportunity;
   onOutreach?: () => void;
   onDetails?: () => void;
+  engagementStatus?: "engaged" | "applied";
 }) {
   return (
     <article className="card">
@@ -27,6 +29,7 @@ export function OpportunityCard({
         <strong>{opp.personName ?? opp.personId}</strong>
         <span className="arrow">→</span>
         <span className="job">{opp.jdTitle}</span>
+        {engagementStatus && <span className={`badge-fresh ${engagementStatus}`}>● {engagementStatus}</span>}
         {onDetails && <span className="details-hint">details ›</span>}
       </div>
 

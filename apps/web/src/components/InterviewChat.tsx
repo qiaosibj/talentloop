@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ResumeProfile } from "@talentloop/resume-parser";
 import type { JdRequirement } from "@talentloop/jd-parser";
+import { INITIAL_QUICK_REPLIES, UNLOCK_AT } from "@/lib/interview";
+import { recordEngagement } from "@/lib/store";
 
 interface ChatTurn {
   role: "agent" | "user";
@@ -26,9 +28,12 @@ interface ChatResponse {
 const SLOT_LABELS: Record<string, string> = {
   jobStatus: "Job-search status",
   currentWork: "Current role",
+  experienceHighlight: "Recent highlight",
   hardRequirements: "Practical requirements",
   salaryExpectation: "Salary expectation",
 };
+
+const SLOT_COUNT = Object.keys(SLOT_LABELS).length;
 
 export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd: JdRequirement }) {
   const candidateName = candidate.basics.name ?? candidate.id;
@@ -38,8 +43,13 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<string>("");
   const [error, setError] = useState("");
+  const [applied, setApplied] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const openedRef = useRef(false);
+  const recordedRef = useRef(false);
+
+  const filled = Object.keys(state.profile).filter((k) => k in SLOT_LABELS).length;
+  const unlocked = filled >= UNLOCK_AT || state.done;
 
   const callApi = useCallback(
     async (payload: object): Promise<ChatResponse | null> => {
@@ -71,19 +81,33 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
       if (data) {
         setState(data.state);
         setMode(data.mode);
+        setQuickReplies(INITIAL_QUICK_REPLIES);
       }
     });
   }, [callApi]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [state.history, loading]);
+  }, [state.history, loading, unlocked]);
+
+  // The loop closes here: once enough is learned (or the chat finishes),
+  // conversation results flow back into the talent pool.
+  useEffect(() => {
+    if (!state.done || recordedRef.current) return;
+    recordedRef.current = true;
+    void recordEngagement(candidate.id, {
+      status: applied ? "applied" : "engaged",
+      at: Date.now(),
+      jdId: jd.id,
+      jdTitle: jd.title,
+      answers: state.profile,
+    });
+  }, [state.done, applied, candidate.id, jd.id, jd.title, state.profile]);
 
   async function send(text: string) {
     const message = text.trim();
     if (!message || loading || state.done) return;
     setInput("");
-    // Optimistic render of the user turn.
     setState((s) => ({ ...s, history: [...s.history, { role: "user", text: message }] }));
     setQuickReplies([]);
     const data = await callApi({ state, message });
@@ -94,7 +118,21 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
     }
   }
 
-  const filledSlots = Object.entries(state.profile);
+  function onApply() {
+    setApplied(true);
+    void recordEngagement(candidate.id, {
+      status: "applied",
+      at: Date.now(),
+      jdId: jd.id,
+      jdTitle: jd.title,
+      answers: state.profile,
+    });
+  }
+
+  const salary =
+    jd.offer.salaryMin || jd.offer.salaryMax
+      ? `${jd.offer.salaryMin?.toLocaleString() ?? "?"}–${jd.offer.salaryMax?.toLocaleString() ?? "?"} ${jd.offer.currency ?? "EUR"}/yr`
+      : null;
 
   return (
     <div className="chat-layout">
@@ -104,6 +142,19 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
             Demo mode — scripted conversation engine. Set <code>ANTHROPIC_API_KEY</code> for a real AI interviewer.
           </div>
         )}
+
+        <div className="chat-progress">
+          <span>
+            {filled}/{SLOT_COUNT} answered
+          </span>
+          <div className="progress-dots">
+            {Array.from({ length: SLOT_COUNT }).map((_, i) => (
+              <span key={i} className={`dot ${i < filled ? "on" : ""}`} />
+            ))}
+          </div>
+          <span className="muted-inline">{unlocked ? "position unlocked 🎉" : `${Math.max(0, UNLOCK_AT - filled)} more to unlock the position`}</span>
+        </div>
+
         <div className="chat-scroll" ref={scrollRef}>
           {state.history.map((turn, i) => (
             <div key={i} className={`bubble ${turn.role}`}>
@@ -111,13 +162,52 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
             </div>
           ))}
           {loading && <div className="bubble agent typing">…</div>}
-          {state.done && (
+          {state.done && !applied && (
             <div className="done-card">
-              ✅ Pre-screening complete. Thanks, {candidateName}! A human recruiter will review your answers and get
-              back to you within two working days.
+              ✅ All done — thanks, {candidateName}! A human recruiter will review your answers and get back to you
+              within two working days. Interested already? Apply directly below.
+            </div>
+          )}
+          {applied && (
+            <div className="done-card">
+              🎉 Application sent! The recruiter sees your conversation summary alongside it — no forms to fill twice.
             </div>
           )}
         </div>
+
+        {/* Job reveal capsule — locked until enough answers, then tappable. */}
+        <div className={`job-capsule ${unlocked ? "unlocked" : ""} ${applied ? "applied" : ""}`}>
+          {!unlocked ? (
+            <>
+              <span className="capsule-lock">🔒</span>
+              <div>
+                <strong>A matching position at {jd.company ?? "a hiring company"}</strong>
+                <span className="capsule-sub">Answer {Math.max(0, UNLOCK_AT - filled)} more question{UNLOCK_AT - filled === 1 ? "" : "s"} to see the full details</span>
+              </div>
+              <span className="badge-new">NEW</span>
+            </>
+          ) : (
+            <>
+              <span className="capsule-lock">{applied ? "✅" : "✨"}</span>
+              <div>
+                <strong>
+                  {jd.title} · {jd.company ?? ""}
+                </strong>
+                <span className="capsule-sub">
+                  {[jd.location, salary, ...(jd.offer.benefits?.slice(0, 2) ?? [])].filter(Boolean).join(" · ")}
+                </span>
+              </div>
+              {!applied ? (
+                <button className="btn-primary" onClick={onApply}>
+                  Apply now
+                </button>
+              ) : (
+                <span className="badge-applied">applied</span>
+              )}
+            </>
+          )}
+        </div>
+
         {error && <p className="error">{error}</p>}
         {!state.done && (
           <>
@@ -164,8 +254,8 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
           );
         })}
         <p className="muted small">
-          {filledSlots.length}/{Object.keys(SLOT_LABELS).length} fields · conversation overrides stored data · AI never
-          makes the hiring decision
+          {filled}/{SLOT_COUNT} fields · conversation overrides stored data · answers flow back into the talent pool ·
+          AI never makes the hiring decision
         </p>
       </aside>
     </div>

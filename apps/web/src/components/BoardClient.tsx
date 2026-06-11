@@ -123,6 +123,7 @@ export function BoardClient() {
                   opp={opp}
                   onOutreach={() => setOutreachFor(opp)}
                   onDetails={() => setDetailFor(opp)}
+                  engagementStatus={findCandidate(pool, opp.personId)?.engagement?.status}
                 />
               ))}
             </section>

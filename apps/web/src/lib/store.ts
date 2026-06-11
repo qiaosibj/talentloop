@@ -20,8 +20,23 @@ export interface OutreachTemplate {
   body: string;
 }
 
+/**
+ * What came back from the candidate conversation. Conversation data
+ * overrides stored resume data — the person talking now outranks a stale
+ * document — and the freshness is surfaced across the app.
+ */
+export interface CandidateEngagement {
+  status: "engaged" | "applied";
+  at: number;
+  jdId: string;
+  jdTitle: string;
+  answers: Record<string, string>;
+}
+
+export type PoolCandidate = ResumeProfile & { engagement?: CandidateEngagement };
+
 export interface Pool {
-  candidates: ResumeProfile[];
+  candidates: PoolCandidate[];
   jobs: JdRequirement[];
   templates: OutreachTemplate[];
 }
@@ -103,8 +118,47 @@ export async function resetPool(): Promise<Pool> {
   return fresh;
 }
 
-export function findCandidate(pool: Pool, id: string): ResumeProfile | undefined {
+export function findCandidate(pool: Pool, id: string): PoolCandidate | undefined {
   return pool.candidates.find((c) => c.id === id);
+}
+
+/**
+ * Write conversation results back into the pool (the "loop" in TalentLoop):
+ * - engagement status + extracted answers stored on the candidate
+ * - a parseable salary expectation updates the matching input directly,
+ *   so the next "Run matching" reflects what the person just said
+ * - "applied" never downgrades to "engaged"
+ */
+export async function recordEngagement(
+  candidateId: string,
+  engagement: CandidateEngagement,
+): Promise<void> {
+  const pool = await loadPool();
+  const candidate = pool.candidates.find((c) => c.id === candidateId);
+  if (!candidate) return;
+  if (candidate.engagement?.status === "applied" && engagement.status === "engaged") {
+    candidate.engagement = { ...engagement, status: "applied" };
+  } else {
+    candidate.engagement = engagement;
+  }
+  const salary = parseSalaryText(engagement.answers.salaryExpectation);
+  if (salary) {
+    candidate.intention = { ...candidate.intention, salaryMin: salary };
+  }
+  await savePool(pool);
+}
+
+/** "around 48k", "48.000 €", "55000-60000" → annual number (lower bound). */
+export function parseSalaryText(s?: string): number | undefined {
+  if (!s) return undefined;
+  const cleaned = s.toLowerCase().replace(/[€$£\s,]/g, (m) => (m === "," ? "." : ""));
+  const m = cleaned.match(/(\d+(?:\.\d+)?)(k)?/);
+  if (!m) return undefined;
+  let value = parseFloat(m[1].replace(/\.(?=\d{3}\b)/g, ""));
+  if (isNaN(value)) return undefined;
+  if (m[2] === "k" || value < 1000) value *= 1000;
+  if (value < 5000 || value > 2_000_000) return undefined;
+  return Math.round(value);
 }
 
 export function findJob(pool: Pool, id: string): JdRequirement | undefined {

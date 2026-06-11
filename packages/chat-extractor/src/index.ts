@@ -79,26 +79,18 @@ export class TwoStageExtractor {
     return { reply, quickReplies: [], state };
   }
 
-  /** One conversation turn: dialogue stage + extraction stage. */
+  /**
+   * One conversation turn: extraction stage FIRST, then dialogue.
+   *
+   * Extraction must run before the reply is generated — otherwise the
+   * dialogue stage doesn't know what the user's latest message just
+   * answered and re-asks the same question. (Found the hard way.)
+   */
   async chat(state: ChatState, userMessage: string): Promise<ChatStep> {
     const history: ChatTurn[] = [...state.history, { role: "user", text: userMessage }];
 
-    // Stage 1: natural dialogue.
-    const missing = this.cfg.slots.filter((s) => !(s.key in state.profile));
-    const reply = await this.llm.complete(
-      [
-        `Goal: ${this.cfg.goal}`,
-        `Already learned: ${JSON.stringify(state.profile)}`,
-        `Still to learn (ask at most ONE per turn, in this order): ${missing.map((s) => s.label).join("; ") || "nothing — wrap up warmly"}`,
-        `Conversation so far:`,
-        renderTranscript(history),
-        `Respond as the agent: react naturally to what the user just said, then ${missing.length > 0 ? "ask the next question" : "thank them and close"}. Plain text only.`,
-      ].join("\n\n"),
-      { system: this.cfg.persona, temperature: this.cfg.dialogueTemperature ?? 0.7 },
-    );
-    history.push({ role: "agent", text: reply });
-
-    // Stage 2: low-temperature structured extraction over the transcript.
+    // Stage 1: low-temperature structured extraction over the transcript
+    // including the user's latest message.
     const extracted = await completeJson<{
       slots: Record<string, string>;
       quickReplies: string[];
@@ -110,7 +102,7 @@ export class TwoStageExtractor {
         `Slots: ${JSON.stringify(this.cfg.slots.map((s) => ({ key: s.key, description: s.description })))}`,
         `Transcript:`,
         renderTranscript(history),
-        `Return ONLY JSON: { "slots": { <key>: <string value, omit if not yet mentioned> }, "quickReplies": [2-3 short answers the user could tap for the agent's last question], "done": <true when every slot has a value> }`,
+        `Return ONLY JSON: { "slots": { <key>: <string value, omit if not yet mentioned> }, "quickReplies": [2-3 short answers the user could plausibly tap for the FIRST slot in the list that has no value yet], "done": <true when every slot has a value> }`,
       ].join("\n\n"),
       { temperature: this.cfg.extractTemperature ?? 0.2 },
     );
@@ -121,27 +113,24 @@ export class TwoStageExtractor {
       if (v && String(v).trim()) profile[k] = String(v).trim();
     }
     const done = extracted.done || this.cfg.slots.every((s) => s.key in profile);
+    const missing = this.cfg.slots.filter((s) => !(s.key in profile));
 
-    // The dialogue stage ran before extraction, so on the final turn it may
-    // still have asked another question. Regenerate a proper closing instead.
-    let finalReply = reply;
-    if (done && missing.length > 0) {
-      finalReply = await this.llm.complete(
-        [
-          `Goal: ${this.cfg.goal}`,
-          `Everything needed has now been learned: ${JSON.stringify(profile)}`,
-          `Still to learn (ask at most ONE per turn, in this order): nothing — wrap up warmly`,
-          `Conversation so far:`,
-          renderTranscript(history.slice(0, -1)),
-          `Respond as the agent: thank them warmly, confirm a human will follow up, and close. Plain text only, no further questions.`,
-        ].join("\n\n"),
-        { system: this.cfg.persona, temperature: this.cfg.dialogueTemperature ?? 0.7 },
-      );
-      history[history.length - 1] = { role: "agent", text: finalReply };
-    }
+    // Stage 2: natural dialogue, now aware of what this turn answered.
+    const reply = await this.llm.complete(
+      [
+        `Goal: ${this.cfg.goal}`,
+        `Already learned: ${JSON.stringify(profile)}`,
+        `Still to learn (ask at most ONE per turn, in this order): ${!done && missing.length > 0 ? missing.map((s) => s.label).join("; ") : "nothing — wrap up warmly"}`,
+        `Conversation so far:`,
+        renderTranscript(history),
+        `Respond as the agent: react naturally to what the user just said, then ${!done && missing.length > 0 ? "ask the next question" : "thank them warmly, confirm a human will follow up, and close — no further questions"}. Plain text only.`,
+      ].join("\n\n"),
+      { system: this.cfg.persona, temperature: this.cfg.dialogueTemperature ?? 0.7 },
+    );
+    history.push({ role: "agent", text: reply });
 
     return {
-      reply: finalReply,
+      reply,
       quickReplies: done ? [] : (extracted.quickReplies ?? []),
       state: { history, profile, done },
     };

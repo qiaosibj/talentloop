@@ -16,6 +16,11 @@ export const INTERVIEW_SLOTS: SlotDef[] = [
     description: "What the candidate currently does (role, employer type, main tasks)",
   },
   {
+    key: "experienceHighlight",
+    label: "a recent achievement or project they're proud of",
+    description: "A concrete recent achievement, project or result the candidate mentions",
+  },
+  {
     key: "hardRequirements",
     label: "practical requirements (start date, working hours, commute or remote needs)",
     description: "Hard constraints: earliest start date, full/part-time, location or remote preferences, work-permit notes",
@@ -26,6 +31,12 @@ export const INTERVIEW_SLOTS: SlotDef[] = [
     description: "Expected salary or salary range, with currency and period if mentioned",
   },
 ];
+
+/** Quick replies for the opening question, shown before the first user turn. */
+export const INITIAL_QUICK_REPLIES = ["Actively looking", "Open to opportunities", "Happy where I am, but curious"];
+
+/** How many answered questions unlock the job reveal capsule. */
+export const UNLOCK_AT = 3;
 
 export function buildInterviewer(candidate: ResumeProfile, jd: JdRequirement) {
   const { llm, mode } = selectLlm();
