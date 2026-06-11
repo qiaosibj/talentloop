@@ -31,9 +31,16 @@ export interface CandidateEngagement {
   jdId: string;
   jdTitle: string;
   answers: Record<string, string>;
+  /** True when the candidate refreshed their resume while applying. */
+  resumeUpdated?: boolean;
 }
 
-export type PoolCandidate = ResumeProfile & { engagement?: CandidateEngagement };
+export type PoolCandidate = ResumeProfile & {
+  engagement?: CandidateEngagement;
+  /** Raw resume text submitted with an application, awaiting AI parsing (demo mode without an API key). */
+  rawResumeText?: string;
+  resumeUpdatedAt?: number;
+};
 
 export interface Pool {
   candidates: PoolCandidate[];
@@ -145,6 +152,43 @@ export async function recordEngagement(
   if (salary) {
     candidate.intention = { ...candidate.intention, salaryMin: salary };
   }
+  await savePool(pool);
+}
+
+/**
+ * Application with optional resume refresh — the deep end of the loop:
+ * - `parsed`: an AI-parsed updated resume replaces the structured fields
+ *   (id and engagement survive; conversation answers still win on salary)
+ * - `rawText`: no API key → the raw text is stored with the application,
+ *   flagged for parsing later; the structured profile stays as-is
+ */
+export async function recordApplication(
+  candidateId: string,
+  engagement: CandidateEngagement,
+  resume?: { parsed?: ResumeProfile; rawText?: string },
+): Promise<void> {
+  const pool = await loadPool();
+  const candidate = pool.candidates.find((c) => c.id === candidateId);
+  if (!candidate) return;
+
+  if (resume?.parsed) {
+    const p = resume.parsed;
+    candidate.basics = { ...p.basics, name: p.basics.name ?? candidate.basics.name };
+    candidate.experiences = p.experiences;
+    candidate.education = p.education;
+    candidate.skills = p.skills;
+    candidate.certifications = p.certifications;
+    candidate.intention = { ...candidate.intention, ...p.intention };
+    candidate.derived = p.derived;
+    candidate.rawResumeText = undefined;
+  } else if (resume?.rawText) {
+    candidate.rawResumeText = resume.rawText;
+  }
+  if (resume) candidate.resumeUpdatedAt = Date.now();
+
+  candidate.engagement = { ...engagement, status: "applied", resumeUpdated: Boolean(resume) };
+  const salary = parseSalaryText(engagement.answers.salaryExpectation);
+  if (salary) candidate.intention = { ...candidate.intention, salaryMin: salary };
   await savePool(pool);
 }
 

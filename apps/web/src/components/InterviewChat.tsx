@@ -5,6 +5,7 @@ import type { ResumeProfile } from "@talentloop/resume-parser";
 import type { JdRequirement } from "@talentloop/jd-parser";
 import { INITIAL_QUICK_REPLIES, UNLOCK_AT } from "@/lib/interview";
 import { recordEngagement } from "@/lib/store";
+import { ApplyModal } from "@/components/ApplyModal";
 
 interface ChatTurn {
   role: "agent" | "user";
@@ -44,6 +45,7 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
   const [mode, setMode] = useState<string>("");
   const [error, setError] = useState("");
   const [applied, setApplied] = useState(false);
+  const [applying, setApplying] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const openedRef = useRef(false);
   const recordedRef = useRef(false);
@@ -118,15 +120,11 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
     }
   }
 
-  function onApply() {
+  // The ApplyModal handles recording (incl. optional resume refresh).
+  function onApplied() {
+    setApplying(false);
     setApplied(true);
-    void recordEngagement(candidate.id, {
-      status: "applied",
-      at: Date.now(),
-      jdId: jd.id,
-      jdTitle: jd.title,
-      answers: state.profile,
-    });
+    recordedRef.current = true;
   }
 
   const salary =
@@ -198,7 +196,7 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
                 </span>
               </div>
               {!applied ? (
-                <button className="btn-primary" onClick={onApply}>
+                <button className="btn-primary" onClick={() => setApplying(true)}>
                   Apply now
                 </button>
               ) : (
@@ -240,6 +238,16 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
           </>
         )}
       </section>
+
+      {applying && (
+        <ApplyModal
+          candidate={candidate}
+          jd={jd}
+          answers={state.profile}
+          onClose={() => setApplying(false)}
+          onApplied={onApplied}
+        />
+      )}
 
       <aside className="profile-panel">
         <h3>Structured profile</h3>

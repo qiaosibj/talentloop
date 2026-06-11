@@ -31,7 +31,21 @@ export function CandidateDetail({ candidate }: { candidate: PoolCandidate }) {
               <Field key={k} label={ANSWER_LABELS[k] ?? k} value={v} />
             ))}
           </div>
+          {candidate.engagement.resumeUpdated && (
+            <p className="muted small">
+              📄 Resume refreshed during application
+              {candidate.resumeUpdatedAt ? ` (${new Date(candidate.resumeUpdatedAt).toLocaleString()})` : ""}.
+              {candidate.rawResumeText ? " Raw text attached — awaiting AI parsing." : " Profile fields updated from the new resume."}
+            </p>
+          )}
           <p className="muted small">Conversation data overrides resume data in matching (e.g. salary expectation).</p>
+        </section>
+      )}
+
+      {candidate.rawResumeText && (
+        <section className="detail-section">
+          <h4>Submitted resume text (unparsed)</h4>
+          <p className="exp-desc raw-resume">{candidate.rawResumeText.slice(0, 600)}{candidate.rawResumeText.length > 600 ? "…" : ""}</p>
         </section>
       )}
       <section className="detail-section">

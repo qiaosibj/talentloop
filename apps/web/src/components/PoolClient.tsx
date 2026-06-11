@@ -188,7 +188,13 @@ export function PoolClient() {
                   {c.derived && <span className="badge-ai">AI-inferred role</span>}
                   {c.engagement && (
                     <span className={`badge-fresh ${c.engagement.status}`}>
-                      ● {c.engagement.status === "applied" ? "applied" : "engaged"} · {relTime(c.engagement.at)}
+                      ●{" "}
+                      {c.engagement.status === "applied"
+                        ? c.engagement.resumeUpdated
+                          ? "applied · resume updated"
+                          : "applied"
+                        : "engaged"}{" "}
+                      · {relTime(c.engagement.at)}
                     </span>
                   )}
                   <span className="details-hint">details ›</span>

@@ -1095,3 +1095,45 @@ select {
   border-radius: 10px;
   padding: 12px 14px;
 }
+
+/* ---------- apply modal choices ---------- */
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px 0 12px;
+}
+
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+}
+
+.choice input {
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+
+.choice.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.choice strong {
+  display: block;
+}
+
+.raw-resume {
+  white-space: pre-wrap;
+  background: var(--gray-soft);
+  border-radius: 8px;
+  padding: 10px 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
