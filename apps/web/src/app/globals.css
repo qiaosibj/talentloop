@@ -1342,9 +1342,13 @@ select {
 }
 
 .tour-list a {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  grid-template-areas:
+    "num title"
+    ". desc";
+  gap: 4px 14px;
+  align-items: center;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1355,7 +1359,7 @@ select {
 
 .tour-list a::before {
   content: counter(tour);
-  flex-shrink: 0;
+  grid-area: num;
   width: 24px;
   height: 24px;
   display: inline-flex;
@@ -1366,7 +1370,6 @@ select {
   color: var(--ink-600);
   font-weight: 700;
   font-size: 12.5px;
-  align-self: center;
 }
 
 .tour-list a:hover {
@@ -1379,14 +1382,15 @@ select {
 }
 
 .tour-list strong {
-  display: block;
+  grid-area: title;
   font-size: 14.5px;
-  white-space: nowrap;
 }
 
 .tour-list span {
+  grid-area: desc;
   font-size: 12.5px;
   color: var(--ink-600);
+  line-height: 1.55;
 }
 
 /* ---------- toast ---------- */
@@ -1563,19 +1567,6 @@ select {
 
   .landing-section {
     padding: 26px 0;
-  }
-
-  .tour-list strong {
-    white-space: normal;
-  }
-
-  .tour-list a {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .tour-list a::before {
-    align-self: flex-start;
   }
 
   /* board */
