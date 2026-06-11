@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3100",
-    "build": "tsc -b ../.. && next build",
+    "build": "npx tsc -b ../.. && npx next build",
     "start": "next start -p 3100"
   },
   "dependencies": {
