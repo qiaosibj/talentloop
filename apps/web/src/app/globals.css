@@ -1719,3 +1719,42 @@ select {
     padding: 10px 16px;
   }
 }
+
+/* ---------- mobile refinements round 2 ---------- */
+@media (max-width: 640px) {
+  /* Nav gets its own row, evenly spread — no more logo/menu collision */
+  .main-nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* Tour cards: number + title on one row, description full-width below —
+     kills the narrow right column and the dead whitespace */
+  .tour-list a {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    grid-template-areas:
+      "num title"
+      "desc desc";
+    gap: 6px 10px;
+    align-items: center;
+    padding: 12px 14px;
+  }
+
+  .tour-list a::before {
+    grid-area: num;
+    align-self: center;
+  }
+
+  .tour-list strong {
+    grid-area: title;
+    white-space: normal;
+    font-size: 14px;
+  }
+
+  .tour-list span {
+    grid-area: desc;
+    line-height: 1.5;
+  }
+}
