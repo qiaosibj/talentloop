@@ -736,3 +736,73 @@ select {
   font-family: inherit;
   margin-bottom: 10px;
 }
+
+/* ---------- CSV import ---------- */
+.modal-wide {
+  max-width: 760px;
+}
+
+.file-drop {
+  display: block;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--ink-600);
+  cursor: pointer;
+  font-size: 14.5px;
+  margin: 8px 0 12px;
+}
+
+.file-drop:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mapping-table-wrap {
+  max-height: 46vh;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 4px;
+}
+
+.mapping-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.mapping-table th {
+  text-align: left;
+  background: var(--gray-soft);
+  color: var(--ink-600);
+  padding: 8px 12px;
+  position: sticky;
+  top: 0;
+}
+
+.mapping-table td {
+  padding: 7px 12px;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.mapping-table .col-header {
+  font-weight: 600;
+  max-width: 160px;
+  overflow-wrap: break-word;
+}
+
+.mapping-table .col-preview {
+  color: var(--ink-400);
+  font-size: 12px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapping-table .row-ignored {
+  opacity: 0.55;
+}

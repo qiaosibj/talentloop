@@ -11,8 +11,9 @@ export function InterviewClient({ personId, jdId }: { personId: string; jdId: st
   const [resolved, setResolved] = useState<{ candidate?: ResumeProfile; jd?: JdRequirement } | null>(null);
 
   useEffect(() => {
-    const pool = loadPool();
-    setResolved({ candidate: findCandidate(pool, personId), jd: findJob(pool, jdId) });
+    void loadPool().then((pool) => {
+      setResolved({ candidate: findCandidate(pool, personId), jd: findJob(pool, jdId) });
+    });
   }, [personId, jdId]);
 
   if (!resolved) return <main className="interview" />;

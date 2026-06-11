@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { JdRequirement, JobCategory } from "@talentloop/jd-parser";
 import { Pool, loadPool, newId, savePool } from "@/lib/store";
 
 const CATEGORIES: JobCategory[] = ["blue-collar", "sales", "technical", "general"];
 
 export function JobsClient() {
-  const [pool, setPool] = useState<Pool>(() => loadPool());
+  const [pool, setPool] = useState<Pool | null>(null);
   const [tab, setTab] = useState<"paste" | "form">("paste");
   const [pasteText, setPasteText] = useState("");
   const [parsing, setParsing] = useState(false);
@@ -26,18 +26,24 @@ export function JobsClient() {
     benefits: "",
   });
 
+  useEffect(() => {
+    void loadPool().then(setPool);
+  }, []);
+
+  if (!pool) return <main className="board" />;
+
   function persist(next: Pool) {
-    savePool(next);
     setPool(next);
+    void savePool(next);
   }
 
   function addJob(jd: JdRequirement) {
-    persist({ ...pool, jobs: [jd, ...pool.jobs] });
+    persist({ ...pool!, jobs: [jd, ...pool!.jobs] });
     setNotice(`Added "${jd.title}".`);
   }
 
   function removeJob(id: string) {
-    persist({ ...pool, jobs: pool.jobs.filter((j) => j.id !== id) });
+    persist({ ...pool!, jobs: pool!.jobs.filter((j) => j.id !== id) });
   }
 
   async function parsePasted() {

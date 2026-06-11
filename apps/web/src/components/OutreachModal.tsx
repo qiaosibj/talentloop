@@ -67,7 +67,7 @@ export function OutreachModal({
       ...pool,
       templates: pool.templates.map((t) => (t.id === template.id ? { ...t, body: templateBody } : t)),
     };
-    savePool(next);
+    void savePool(next);
     onTemplatesChanged(next);
     setEditingTemplate(false);
   }

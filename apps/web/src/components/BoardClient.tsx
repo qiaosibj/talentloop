@@ -36,9 +36,10 @@ export function BoardClient() {
   const [outreachFor, setOutreachFor] = useState<Opportunity | null>(null);
 
   useEffect(() => {
-    const p = loadPool();
-    setPool(p);
-    void doMatch(p, "");
+    void loadPool().then((p) => {
+      setPool(p);
+      void doMatch(p, "");
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -53,10 +54,11 @@ export function BoardClient() {
 
   function onReset() {
     if (!confirm("Replace your current pool with the sample data?")) return;
-    const fresh = resetPool();
-    setPool(fresh);
-    setJobId("");
-    void doMatch(fresh, "");
+    void resetPool().then((fresh) => {
+      setPool(fresh);
+      setJobId("");
+      void doMatch(fresh, "");
+    });
   }
 
   if (!pool) return <main className="board" />;

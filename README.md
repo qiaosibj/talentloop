@@ -16,12 +16,12 @@ npm run web      # Web app at http://localhost:3100 — board + AI pre-screening
 
 The web app is a working product loop, not a static showcase:
 
-1. **Bring your own data** — add candidates and job postings by pasting raw text (AI parsing) or via quick forms (no API key needed); sample data is preloaded so the loop is explorable immediately.
+1. **Bring your own data** — import a whole spreadsheet (CSV with **automatic column recognition** in English/German/Chinese plus a confirm-mapping step; comma, semicolon and tab delimiters detected), paste raw text (AI parsing), or use quick forms (no API key needed); sample data is preloaded so the loop is explorable immediately.
 2. **Run matching on demand** — against all positions or one specific job; results re-rank live as the pool changes, classified **optimal** (contact first), **probe** (worth a try) or **explore** (long shot), each with plain-language reasons.
 3. **Generate outreach messages** — per-tier editable templates filled with real opportunity data (including the pre-screening link); one-click copy, optional AI rewrite.
 4. **AI pre-screening interview** — the candidate-side chat behind that link, with a structured profile filling live; that profile is what the recruiter receives.
 
-**Local-first privacy:** the talent pool lives in your browser (localStorage) and matching runs client-side — candidate data never leaves your device. Only explicit AI features (parsing, chat, rewrite) call the server. Without an API key those run in honest demo mode; set `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY` + `OPENAI_MODEL`) to enable real AI.
+**Local-first privacy:** the talent pool lives in your browser (IndexedDB — room for tens of thousands of candidates) and matching runs client-side — candidate data never leaves your device. Only explicit AI features (parsing, chat, rewrite) call the server. Without an API key those run in honest demo mode; set `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY` + `OPENAI_MODEL`) to enable real AI.
 
 ## Packages
 

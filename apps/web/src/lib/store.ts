@@ -3,12 +3,14 @@
 import type { ResumeProfile } from "@talentloop/resume-parser";
 import type { JdRequirement } from "@talentloop/jd-parser";
 import { JDS, RESUMES } from "./data";
+import { idbGet, idbSet } from "./idb";
 
 /**
  * Local-first storage: the entire talent pool lives in the browser
- * (localStorage). Candidate data never leaves the user's device unless an
- * AI feature is explicitly invoked — a deliberate privacy posture for an
- * HR tool, not a shortcut.
+ * (IndexedDB — hundreds of MB of headroom, enough for tens of thousands of
+ * candidates). Candidate data never leaves the user's device unless an AI
+ * feature is explicitly invoked — a deliberate privacy posture for an HR
+ * tool, not a shortcut.
  */
 
 export interface OutreachTemplate {
@@ -61,31 +63,43 @@ function seed(): Pool {
   };
 }
 
-export function loadPool(): Pool {
+export async function loadPool(): Promise<Pool> {
   if (typeof window === "undefined") return seed();
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) {
-      const fresh = seed();
-      window.localStorage.setItem(KEY, JSON.stringify(fresh));
-      return fresh;
+    const fromIdb = await idbGet<Pool>(KEY);
+    if (fromIdb) {
+      if (!fromIdb.templates?.length) fromIdb.templates = DEFAULT_TEMPLATES;
+      return fromIdb;
     }
-    const pool = JSON.parse(raw) as Pool;
-    if (!pool.templates?.length) pool.templates = DEFAULT_TEMPLATES;
-    return pool;
+    // One-time migration from the earlier localStorage version.
+    const legacy = window.localStorage.getItem(KEY);
+    if (legacy) {
+      const pool = JSON.parse(legacy) as Pool;
+      if (!pool.templates?.length) pool.templates = DEFAULT_TEMPLATES;
+      await idbSet(KEY, pool);
+      window.localStorage.removeItem(KEY);
+      return pool;
+    }
+    const fresh = seed();
+    await idbSet(KEY, fresh);
+    return fresh;
   } catch {
     return seed();
   }
 }
 
-export function savePool(pool: Pool): void {
+export async function savePool(pool: Pool): Promise<void> {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(pool));
+  try {
+    await idbSet(KEY, pool);
+  } catch (err) {
+    console.error("savePool failed", err);
+  }
 }
 
-export function resetPool(): Pool {
+export async function resetPool(): Promise<Pool> {
   const fresh = seed();
-  savePool(fresh);
+  await savePool(fresh);
   return fresh;
 }
 

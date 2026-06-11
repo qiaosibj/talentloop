@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ResumeProfile } from "@talentloop/resume-parser";
 import { Pool, loadPool, newId, savePool } from "@/lib/store";
+import { ImportModal } from "@/components/ImportModal";
 
 export function PoolClient() {
-  const [pool, setPool] = useState<Pool>(() => loadPool());
+  const [pool, setPool] = useState<Pool | null>(null);
   const [tab, setTab] = useState<"paste" | "form">("paste");
   const [pasteText, setPasteText] = useState("");
   const [parsing, setParsing] = useState(false);
   const [notice, setNotice] = useState("");
+  const [importing, setImporting] = useState(false);
+
+  useEffect(() => {
+    void loadPool().then(setPool);
+  }, []);
 
   // Structured quick-add form (works without any API key).
   const [form, setForm] = useState({
@@ -25,18 +31,20 @@ export function PoolClient() {
     salaryMin: "",
   });
 
+  if (!pool) return <main className="board" />;
+
   function persist(next: Pool) {
-    savePool(next);
     setPool(next);
+    void savePool(next);
   }
 
-  function addCandidate(profile: ResumeProfile) {
-    persist({ ...pool, candidates: [profile, ...pool.candidates] });
-    setNotice(`Added ${profile.basics.name ?? profile.id} to the pool.`);
+  function addCandidates(profiles: ResumeProfile[], note: string) {
+    persist({ ...pool!, candidates: [...profiles, ...pool!.candidates] });
+    setNotice(note);
   }
 
   function removeCandidate(id: string) {
-    persist({ ...pool, candidates: pool.candidates.filter((c) => c.id !== id) });
+    persist({ ...pool!, candidates: pool!.candidates.filter((c) => c.id !== id) });
   }
 
   async function parsePasted() {
@@ -50,7 +58,8 @@ export function PoolClient() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-      addCandidate(data.profile as ResumeProfile);
+      const profile = data.profile as ResumeProfile;
+      addCandidates([profile], `Added ${profile.basics.name ?? profile.id} to the pool.`);
       setPasteText("");
     } catch (err) {
       setNotice(err instanceof Error ? err.message : "Parsing failed");
@@ -89,7 +98,7 @@ export function PoolClient() {
         locations: form.location.trim() ? [form.location.trim()] : undefined,
       },
     };
-    addCandidate(profile);
+    addCandidates([profile], `Added ${profile.basics.name} to the pool.`);
     setForm({
       name: "",
       location: "",
@@ -109,9 +118,14 @@ export function PoolClient() {
       <section className="hero">
         <h1>Candidate pool</h1>
         <p>
-          {pool.candidates.length} candidates, stored only in this browser. Add candidates by pasting a resume (AI
-          parsing) or with the quick form (no AI needed), then <a href="/">run matching</a>.
+          {pool.candidates.length} candidates, stored only in this browser (IndexedDB). Import a spreadsheet, paste a
+          resume, or use the quick form — then <a href="/">run matching</a>.
         </p>
+        <div className="toolbar">
+          <button className="btn-primary" onClick={() => setImporting(true)}>
+            ⤒ Import CSV
+          </button>
+        </div>
       </section>
 
       <div className="two-col">
@@ -179,6 +193,19 @@ export function PoolClient() {
           </ul>
         </section>
       </div>
+
+      {importing && (
+        <ImportModal
+          onClose={() => setImporting(false)}
+          onImported={(profiles, skipped) => {
+            setImporting(false);
+            addCandidates(
+              profiles,
+              `Imported ${profiles.length} candidates${skipped > 0 ? ` (${skipped} rows skipped — missing name)` : ""}.`,
+            );
+          }}
+        />
+      )}
     </main>
   );
 }
