@@ -1505,3 +1505,217 @@ select {
   padding: 6px 11px;
   font-size: 12.5px;
 }
+
+/* ===================================================================
+   Mobile polish (≤640px)
+   =================================================================== */
+@media (max-width: 640px) {
+  /* chrome */
+  .site-header {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .logo {
+    font-size: 17px;
+  }
+
+  .main-nav {
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  /* page paddings */
+  .board,
+  .interview,
+  .landing {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  /* landing */
+  .landing-hero {
+    padding: 36px 4px 36px;
+    text-align: left;
+  }
+
+  .landing-hero h1 {
+    font-size: 24px;
+  }
+
+  .landing-hero h1 br {
+    display: none;
+  }
+
+  .hero-sub {
+    font-size: 14.5px;
+  }
+
+  .hero-ctas {
+    justify-content: flex-start;
+  }
+
+  .btn-lg {
+    width: 100%;
+    text-align: center;
+  }
+
+  .landing-section {
+    padding: 26px 0;
+  }
+
+  .tour-list strong {
+    white-space: normal;
+  }
+
+  .tour-list a {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .tour-list a::before {
+    align-self: flex-start;
+  }
+
+  /* board */
+  .hero h1 {
+    font-size: 24px;
+  }
+
+  .toolbar {
+    gap: 8px;
+  }
+
+  .toolbar label {
+    width: 100%;
+  }
+
+  .toolbar select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* cards */
+  .score {
+    grid-template-columns: 78px 1fr 38px;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .card-actions .cta {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* entity lists */
+  .entity-list li {
+    flex-wrap: wrap;
+  }
+
+  .entity-list li .btn-ghost {
+    margin-left: auto;
+  }
+
+  /* modals */
+  .modal {
+    padding: 16px 14px;
+    max-height: 92vh;
+    border-radius: 14px;
+  }
+
+  .modal-backdrop {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid .span2 {
+    grid-column: span 1;
+  }
+
+  .modal-actions .btn-primary,
+  .modal-actions .btn-ghost {
+    flex: 1;
+    text-align: center;
+  }
+
+  .mapping-table-wrap {
+    overflow-x: auto;
+  }
+
+  .mapping-table {
+    min-width: 520px;
+  }
+
+  /* match evidence dims */
+  .dim {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "label value" "track track" "hint hint";
+  }
+
+  /* chat */
+  .chat-progress {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 14px;
+  }
+
+  .chat-scroll {
+    padding: 14px;
+    max-height: 52vh;
+  }
+
+  .bubble {
+    max-width: 90%;
+    font-size: 13.5px;
+  }
+
+  .job-capsule {
+    margin: 0 12px 10px;
+    flex-wrap: wrap;
+  }
+
+  .job-capsule .btn-primary {
+    width: 100%;
+  }
+
+  .chat-input {
+    padding: 10px 12px 12px;
+  }
+
+  .quick-replies {
+    padding: 0 12px 8px;
+  }
+
+  /* tier list rows */
+  .opp-actions {
+    flex-wrap: wrap;
+  }
+
+  .opp-actions .btn-ghost,
+  .opp-actions a.btn-ghost {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* choices in apply modal */
+  .choice {
+    padding: 9px 10px;
+  }
+
+  /* toast */
+  .toast {
+    bottom: 16px;
+    font-size: 12.5px;
+    padding: 10px 16px;
+  }
+}
