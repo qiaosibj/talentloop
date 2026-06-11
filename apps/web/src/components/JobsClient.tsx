@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { JdRequirement, JobCategory } from "@talentloop/jd-parser";
 import { Pool, loadPool, newId, savePool } from "@/lib/store";
+import { JobDetail } from "@/components/JobDetail";
 
 const CATEGORIES: JobCategory[] = ["blue-collar", "sales", "technical", "general"];
 
@@ -12,6 +13,7 @@ export function JobsClient() {
   const [pasteText, setPasteText] = useState("");
   const [parsing, setParsing] = useState(false);
   const [notice, setNotice] = useState("");
+  const [viewing, setViewing] = useState<JdRequirement | null>(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -166,12 +168,13 @@ export function JobsClient() {
           <ul className="entity-list">
             {pool.jobs.map((j) => (
               <li key={j.id}>
-                <div>
+                <div className="entity-main clickable" onClick={() => setViewing(j)} title="View job details">
                   <strong>{j.title}</strong>
                   <span className="muted-inline">
                     {" "}
                     · {j.company ?? "—"} · {j.location ?? "—"} · {j.category}
                   </span>
+                  <span className="details-hint">details ›</span>
                 </div>
                 <button className="btn-ghost danger" onClick={() => removeJob(j.id)}>
                   Remove
@@ -181,6 +184,20 @@ export function JobsClient() {
           </ul>
         </section>
       </div>
+
+      {viewing && (
+        <div className="modal-backdrop" onClick={() => setViewing(null)}>
+          <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>{viewing.title}</h3>
+              <button className="modal-close" onClick={() => setViewing(null)}>
+                ✕
+              </button>
+            </header>
+            <JobDetail jd={viewing} />
+          </div>
+        </div>
+      )}
     </main>
   );
 }

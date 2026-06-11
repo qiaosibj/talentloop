@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { ResumeProfile } from "@talentloop/resume-parser";
 import { Pool, loadPool, newId, savePool } from "@/lib/store";
 import { ImportModal } from "@/components/ImportModal";
+import { CandidateDetail } from "@/components/CandidateDetail";
 
 export function PoolClient() {
   const [pool, setPool] = useState<Pool | null>(null);
@@ -12,6 +13,7 @@ export function PoolClient() {
   const [parsing, setParsing] = useState(false);
   const [notice, setNotice] = useState("");
   const [importing, setImporting] = useState(false);
+  const [viewing, setViewing] = useState<ResumeProfile | null>(null);
 
   useEffect(() => {
     void loadPool().then(setPool);
@@ -176,7 +178,7 @@ export function PoolClient() {
           <ul className="entity-list">
             {pool.candidates.map((c) => (
               <li key={c.id}>
-                <div>
+                <div className="entity-main clickable" onClick={() => setViewing(c)} title="View full profile">
                   <strong>{c.basics.name ?? c.id}</strong>
                   <span className="muted-inline">
                     {" "}
@@ -184,6 +186,7 @@ export function PoolClient() {
                     {c.basics.location ?? "—"}
                   </span>
                   {c.derived && <span className="badge-ai">AI-inferred role</span>}
+                  <span className="details-hint">details ›</span>
                 </div>
                 <button className="btn-ghost danger" onClick={() => removeCandidate(c.id)}>
                   Remove
@@ -193,6 +196,20 @@ export function PoolClient() {
           </ul>
         </section>
       </div>
+
+      {viewing && (
+        <div className="modal-backdrop" onClick={() => setViewing(null)}>
+          <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>{viewing.basics.name ?? viewing.id}</h3>
+              <button className="modal-close" onClick={() => setViewing(null)}>
+                ✕
+              </button>
+            </header>
+            <CandidateDetail candidate={viewing} />
+          </div>
+        </div>
+      )}
 
       {importing && (
         <ImportModal

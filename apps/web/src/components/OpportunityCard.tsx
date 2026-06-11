@@ -12,13 +12,22 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function OpportunityCard({ opp, onOutreach }: { opp: Opportunity; onOutreach?: () => void }) {
+export function OpportunityCard({
+  opp,
+  onOutreach,
+  onDetails,
+}: {
+  opp: Opportunity;
+  onOutreach?: () => void;
+  onDetails?: () => void;
+}) {
   return (
     <article className="card">
-      <div className="card-top">
+      <div className={`card-top ${onDetails ? "clickable" : ""}`} onClick={onDetails} title="Open match details">
         <strong>{opp.personName ?? opp.personId}</strong>
         <span className="arrow">→</span>
         <span className="job">{opp.jdTitle}</span>
+        {onDetails && <span className="details-hint">details ›</span>}
       </div>
 
       <ScoreBar label="Job fit" value={opp.matchScore} />

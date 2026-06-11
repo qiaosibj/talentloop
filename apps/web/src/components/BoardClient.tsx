@@ -6,6 +6,8 @@ import { Pool, loadPool, resetPool } from "@/lib/store";
 import { BoardResult, runMatch } from "@/lib/match-client";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import { OutreachModal } from "@/components/OutreachModal";
+import { MatchDetailModal } from "@/components/MatchDetailModal";
+import { findCandidate, findJob } from "@/lib/store";
 
 const TIERS = [
   {
@@ -34,6 +36,7 @@ export function BoardClient() {
   const [board, setBoard] = useState<BoardResult | null>(null);
   const [matching, setMatching] = useState(false);
   const [outreachFor, setOutreachFor] = useState<Opportunity | null>(null);
+  const [detailFor, setDetailFor] = useState<Opportunity | null>(null);
 
   useEffect(() => {
     void loadPool().then((p) => {
@@ -119,6 +122,7 @@ export function BoardClient() {
                   key={`${opp.personId}:${opp.jdId}`}
                   opp={opp}
                   onOutreach={() => setOutreachFor(opp)}
+                  onDetails={() => setDetailFor(opp)}
                 />
               ))}
             </section>
@@ -132,6 +136,15 @@ export function BoardClient() {
           pool={pool}
           onClose={() => setOutreachFor(null)}
           onTemplatesChanged={(p) => setPool(p)}
+        />
+      )}
+
+      {detailFor && findCandidate(pool, detailFor.personId) && findJob(pool, detailFor.jdId) && (
+        <MatchDetailModal
+          opp={detailFor}
+          candidate={findCandidate(pool, detailFor.personId)!}
+          jd={findJob(pool, detailFor.jdId)!}
+          onClose={() => setDetailFor(null)}
         />
       )}
     </main>
