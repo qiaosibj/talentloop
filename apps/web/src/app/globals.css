@@ -1749,3 +1749,36 @@ select {
     line-height: 1.5;
   }
 }
+
+/* ---------- legal page ---------- */
+.legal {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 36px 20px 20px;
+}
+
+.legal h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.legal h2 {
+  font-size: 16px;
+  margin: 26px 0 8px;
+}
+
+.legal p,
+.legal li {
+  font-size: 14px;
+  color: var(--ink-600);
+  line-height: 1.65;
+}
+
+.legal ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.legal strong {
+  color: var(--ink-900);
+}

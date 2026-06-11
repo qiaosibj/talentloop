@@ -26,7 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         {children}
         <footer className="site-footer">
-          Demo with synthetic data only · AI ranks and explains, humans decide · GDPR-first by design
+          Demo with synthetic data only · AI ranks and explains, humans decide · GDPR-first by design ·{" "}
+          <a href="/legal">Legal &amp; Privacy</a>
         </footer>
       </body>
     </html>
