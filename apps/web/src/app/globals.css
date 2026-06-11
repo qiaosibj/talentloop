@@ -1388,3 +1388,26 @@ select {
   font-size: 12.5px;
   color: var(--ink-600);
 }
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink-900);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 11px 20px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(22, 33, 43, 0.25);
+  z-index: 100;
+  animation: toast-in 0.25s ease-out;
+  max-width: 86vw;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

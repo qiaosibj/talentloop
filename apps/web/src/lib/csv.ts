@@ -1,6 +1,7 @@
 "use client";
 
 import type { ResumeProfile } from "@talentloop/resume-parser";
+import type { JdRequirement, JobCategory, MustHave } from "@talentloop/jd-parser";
 
 /**
  * CSV import with dynamic header recognition.
@@ -224,6 +225,157 @@ function parseSalary(s: string): number | undefined {
 }
 
 // ---------------------------------------------------------------------------
+// Job import (same auto-recognition approach, job-specific dictionary)
+// ---------------------------------------------------------------------------
+
+export type JobField =
+  | "title"
+  | "company"
+  | "category"
+  | "location"
+  | "industry"
+  | "skills"
+  | "mustHave"
+  | "niceToHave"
+  | "responsibilities"
+  | "salaryMin"
+  | "salaryMax"
+  | "salaryRange"
+  | "benefits"
+  | "level"
+  | "ignore";
+
+export const JOB_FIELD_LABELS: Record<JobField, string> = {
+  title: "Job title",
+  company: "Company",
+  category: "Category",
+  location: "Location",
+  industry: "Industry",
+  skills: "Required skills",
+  mustHave: "Hard requirements",
+  niceToHave: "Nice to have",
+  responsibilities: "Responsibilities",
+  salaryMin: "Salary from",
+  salaryMax: "Salary to",
+  salaryRange: "Salary range",
+  benefits: "Benefits",
+  level: "Level / seniority",
+  ignore: "— ignore —",
+};
+
+const JOB_SYNONYMS: Record<Exclude<JobField, "ignore">, string[]> = {
+  title: ["jobtitle", "title", "position", "role", "vacancy", "stellenbezeichnung", "stelle", "职位", "岗位", "岗位名称", "职位名称"],
+  company: ["company", "employer", "client", "firma", "unternehmen", "arbeitgeber", "公司", "单位", "客户", "用人单位"],
+  category: ["category", "jobcategory", "type", "kategorie", "类别", "岗位类别", "类型", "岗位类型"],
+  location: ["location", "city", "standort", "ort", "arbeitsort", "地点", "城市", "工作地点", "工作城市"],
+  industry: ["industry", "sector", "branche", "行业"],
+  skills: ["skills", "requiredskills", "skillset", "kenntnisse", "技能", "技能要求"],
+  mustHave: ["musthave", "hardrequirements", "requirements", "voraussetzungen", "anforderungen", "必备", "硬性要求", "必备条件", "任职要求", "岗位要求"],
+  niceToHave: ["nicetohave", "preferred", "plus", "wunschenswert", "wünschenswert", "加分项", "优先", "优先条件"],
+  responsibilities: ["responsibilities", "tasks", "duties", "aufgaben", "taetigkeiten", "职责", "工作内容", "工作职责"],
+  salaryMin: ["salarymin", "salaryfrom", "minsalary", "gehaltvon", "薪资下限", "最低薪资", "薪资从"],
+  salaryMax: ["salarymax", "salaryto", "maxsalary", "gehaltbis", "薪资上限", "最高薪资", "薪资到"],
+  salaryRange: ["salary", "salaryrange", "pay", "compensation", "gehalt", "verguetung", "vergütung", "薪资", "薪资范围", "月薪", "年薪", "工资"],
+  benefits: ["benefits", "perks", "wirbieten", "weoffer", "福利", "待遇", "福利待遇"],
+  level: ["level", "seniority", "grade", "职级", "级别"],
+};
+
+export function guessJobMapping(headers: string[]): JobField[] {
+  const used = new Set<JobField>();
+  return headers.map((header) => {
+    const norm = normalizeHeader(header);
+    if (!norm) return "ignore";
+    for (const [field, synonyms] of Object.entries(JOB_SYNONYMS) as Array<[JobField, string[]]>) {
+      if (used.has(field)) continue;
+      if (synonyms.some((s) => norm === s || norm.includes(s) || s.includes(norm))) {
+        used.add(field);
+        return field;
+      }
+    }
+    return "ignore";
+  });
+}
+
+function normalizeCategory(s: string): JobCategory {
+  const v = s.toLowerCase();
+  if (/sales|verkauf|vertrieb|销售/.test(v)) return "sales";
+  if (/tech|it|engineer|developer|entwickl|技术|研发/.test(v)) return "technical";
+  if (/blue|produktion|lager|handwerk|gewerblich|蓝领|工人|operative/.test(v)) return "blue-collar";
+  if (/general|allgemein|通用/.test(v)) return "general";
+  return "general";
+}
+
+/** Classify a free-text hard requirement into a typed knock-out criterion. */
+function toMustHave(value: string): MustHave {
+  const v = value.toLowerCase();
+  const years = v.match(/(\d+)\s*\+?\s*(years?|jahre|年)/);
+  if (years) return { type: "experience-years", value: years[1] };
+  if (/licen[cs]e|certificat|schein|zertifikat|führerschein|证/.test(v)) return { type: "certification", value };
+  if (/german|english|deutsch|englisch|sprach|语|[abc][12]\b/.test(v)) return { type: "language", value };
+  if (/ausbildung|degree|bachelor|master|diplom|abschluss|学历|vocational/.test(v)) return { type: "education", value };
+  return { type: "skill", value };
+}
+
+function parseSalaryRange(s: string): { min?: number; max?: number } {
+  if (!s) return {};
+  const parts = s
+    .split(/-|–|~|到|至|\bbis\b|\bto\b/i)
+    .map((p) => parseSalary(p))
+    .filter((n): n is number => n !== undefined);
+  if (parts.length >= 2) return { min: Math.min(parts[0], parts[1]), max: Math.max(parts[0], parts[1]) };
+  if (parts.length === 1) return { min: parts[0] };
+  return {};
+}
+
+export function rowsToJobs(rows: string[][], mapping: string[], makeId: () => string): { items: JdRequirement[]; skipped: number } {
+  const items: JdRequirement[] = [];
+  let skipped = 0;
+  for (const row of rows) {
+    const get = (field: JobField): string => {
+      const idx = mapping.indexOf(field);
+      return idx >= 0 ? (row[idx] ?? "").trim() : "";
+    };
+    const title = get("title");
+    if (!title) {
+      skipped++;
+      continue;
+    }
+    // A "salary from" column sometimes carries a full range ("40.000-48.000 €") —
+    // run range parsing on every salary-ish column and merge.
+    const range = parseSalaryRange(get("salaryRange"));
+    const minCol = parseSalaryRange(get("salaryMin"));
+    const salaryMin = minCol.min ?? range.min;
+    const salaryMax = parseSalary(get("salaryMax")) ?? minCol.max ?? range.max;
+
+    items.push({
+      id: makeId(),
+      title,
+      company: get("company") || undefined,
+      category: normalizeCategory(get("category")),
+      location: get("location") || undefined,
+      industry: get("industry") || undefined,
+      mustHave: splitList(get("mustHave")).map(toMustHave),
+      niceToHave: splitList(get("niceToHave")),
+      skills: splitList(get("skills")),
+      responsibilities: splitList(get("responsibilities")).length ? splitList(get("responsibilities")) : undefined,
+      offer: {
+        salaryMin,
+        salaryMax,
+        benefits: splitList(get("benefits")).length ? splitList(get("benefits")) : undefined,
+        level: get("level") || undefined,
+      },
+    });
+  }
+  return { items, skipped };
+}
+
+export const JOBS_TEMPLATE_CSV = [
+  "job title,company,category,location,industry,required skills,hard requirements,salary from,salary to,benefits,responsibilities",
+  '"CNC Machinist","Example GmbH","blue-collar","Munich","machinery","cnc milling; technical drawings","3 years experience; Facharbeiterbrief","44000","52000","30 days vacation; shift bonus","Set up machining centers; first-article inspection"',
+  '"Inside Sales Rep","Sample SE","sales","Hamburg","software","b2b sales; hubspot","2 years experience; German C1","45000","55000","uncapped commission","Qualify leads; run demos"',
+].join("\n");
+
+// ---------------------------------------------------------------------------
 // Fallback template
 // ---------------------------------------------------------------------------
 
@@ -232,3 +384,47 @@ export const TEMPLATE_CSV = [
   '"Max Example","Munich","CNC Machinist","Example GmbH","6","Milling and turning of precision parts","cnc milling; technical drawings","IHK certificate","CNC Machinist","46000","German; English"',
   '"Jane Sample","Berlin","Frontend Developer","Sample AG","4","React storefront development","react; typescript","","Frontend Engineer","65000","English"',
 ].join("\n");
+
+// ---------------------------------------------------------------------------
+// Import specs — one generic modal, two configurations
+// ---------------------------------------------------------------------------
+
+export interface ImportSpec {
+  /** e.g. "candidates" — used in UI copy. */
+  noun: string;
+  idPrefix: string;
+  requiredField: string;
+  requiredLabel: string;
+  fieldLabels: Record<string, string>;
+  guess: (headers: string[]) => string[];
+  convert: (rows: string[][], mapping: string[], makeId: () => string) => { items: unknown[]; skipped: number };
+  templateCsv: string;
+  templateName: string;
+}
+
+export const CANDIDATE_IMPORT_SPEC: ImportSpec = {
+  noun: "candidates",
+  idPrefix: "cand",
+  requiredField: "name",
+  requiredLabel: "Name",
+  fieldLabels: FIELD_LABELS,
+  guess: (headers) => guessMapping(headers),
+  convert: (rows, mapping, makeId) => {
+    const r = rowsToProfiles(rows, mapping as CanonicalField[], makeId);
+    return { items: r.profiles, skipped: r.skipped };
+  },
+  templateCsv: TEMPLATE_CSV,
+  templateName: "talentloop-candidates-template.csv",
+};
+
+export const JOB_IMPORT_SPEC: ImportSpec = {
+  noun: "positions",
+  idPrefix: "jd",
+  requiredField: "title",
+  requiredLabel: "Job title",
+  fieldLabels: JOB_FIELD_LABELS,
+  guess: (headers) => guessJobMapping(headers),
+  convert: (rows, mapping, makeId) => rowsToJobs(rows, mapping, makeId),
+  templateCsv: JOBS_TEMPLATE_CSV,
+  templateName: "talentloop-jobs-template.csv",
+};

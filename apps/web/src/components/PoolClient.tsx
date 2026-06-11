@@ -5,6 +5,8 @@ import type { ResumeProfile } from "@talentloop/resume-parser";
 import { Pool, PoolCandidate, loadPool, newId, savePool } from "@/lib/store";
 import { ImportModal } from "@/components/ImportModal";
 import { CandidateDetail } from "@/components/CandidateDetail";
+import { Toast } from "@/components/Toast";
+import { CANDIDATE_IMPORT_SPEC } from "@/lib/csv";
 
 export function PoolClient() {
   const [pool, setPool] = useState<Pool | null>(null);
@@ -14,6 +16,7 @@ export function PoolClient() {
   const [notice, setNotice] = useState("");
   const [importing, setImporting] = useState(false);
   const [viewing, setViewing] = useState<PoolCandidate | null>(null);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     void loadPool().then(setPool);
@@ -42,7 +45,8 @@ export function PoolClient() {
 
   function addCandidates(profiles: ResumeProfile[], note: string) {
     persist({ ...pool!, candidates: [...profiles, ...pool!.candidates] });
-    setNotice(note);
+    setToast(note);
+    setNotice("");
   }
 
   function removeCandidate(id: string) {
@@ -224,16 +228,19 @@ export function PoolClient() {
 
       {importing && (
         <ImportModal
+          spec={CANDIDATE_IMPORT_SPEC}
           onClose={() => setImporting(false)}
-          onImported={(profiles, skipped) => {
+          onImported={(items, skipped) => {
             setImporting(false);
             addCandidates(
-              profiles,
-              `Imported ${profiles.length} candidates${skipped > 0 ? ` (${skipped} rows skipped — missing name)` : ""}.`,
+              items as ResumeProfile[],
+              `Imported ${items.length} candidates${skipped > 0 ? ` (${skipped} rows skipped — missing name)` : ""}. Now run matching on the board.`,
             );
           }}
         />
       )}
+
+      {toast && <Toast message={toast} onClose={() => setToast("")} />}
     </main>
   );
 }

@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import type { JdRequirement, JobCategory } from "@talentloop/jd-parser";
 import { Pool, loadPool, newId, savePool } from "@/lib/store";
 import { JobDetail } from "@/components/JobDetail";
+import { ImportModal } from "@/components/ImportModal";
+import { Toast } from "@/components/Toast";
+import { JOB_IMPORT_SPEC } from "@/lib/csv";
 
 const CATEGORIES: JobCategory[] = ["blue-collar", "sales", "technical", "general"];
 
@@ -14,6 +17,8 @@ export function JobsClient() {
   const [parsing, setParsing] = useState(false);
   const [notice, setNotice] = useState("");
   const [viewing, setViewing] = useState<JdRequirement | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [toast, setToast] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -39,9 +44,14 @@ export function JobsClient() {
     void savePool(next);
   }
 
+  function addJobs(jds: JdRequirement[], note: string) {
+    persist({ ...pool!, jobs: [...jds, ...pool!.jobs] });
+    setToast(note);
+    setNotice("");
+  }
+
   function addJob(jd: JdRequirement) {
-    persist({ ...pool!, jobs: [jd, ...pool!.jobs] });
-    setNotice(`Added "${jd.title}".`);
+    addJobs([jd], `Added "${jd.title}".`);
   }
 
   function removeJob(id: string) {
@@ -109,9 +119,14 @@ export function JobsClient() {
       <section className="hero">
         <h1>Open positions</h1>
         <p>
-          {pool.jobs.length} positions. Add a job by pasting the JD (AI parsing) or with the quick form, then{" "}
+          {pool.jobs.length} positions. Import a CSV, paste a JD (AI parsing), or use the quick form — then{" "}
           <a href="/board">run matching</a> to see who in your pool fits it.
         </p>
+        <div className="toolbar">
+          <button className="btn-primary" onClick={() => setImporting(true)}>
+            ⤒ Import CSV
+          </button>
+        </div>
       </section>
 
       <div className="two-col">
@@ -198,6 +213,22 @@ export function JobsClient() {
           </div>
         </div>
       )}
+
+      {importing && (
+        <ImportModal
+          spec={JOB_IMPORT_SPEC}
+          onClose={() => setImporting(false)}
+          onImported={(items, skipped) => {
+            setImporting(false);
+            addJobs(
+              items as JdRequirement[],
+              `Imported ${items.length} positions${skipped > 0 ? ` (${skipped} rows skipped — missing title)` : ""}. Now run matching on the board.`,
+            );
+          }}
+        />
+      )}
+
+      {toast && <Toast message={toast} onClose={() => setToast("")} />}
     </main>
   );
 }
