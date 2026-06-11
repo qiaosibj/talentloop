@@ -1411,3 +1411,21 @@ select {
   from { opacity: 0; transform: translate(-50%, 12px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* ---------- board empty state & stale hint ---------- */
+.board-empty {
+  background: var(--card);
+  border: 1.5px dashed var(--line);
+  border-radius: 16px;
+  text-align: center;
+  padding: 48px 20px;
+}
+
+.board-empty p {
+  margin: 0 0 10px;
+}
+
+.stale-hint {
+  color: var(--amber);
+  font-weight: 600;
+}

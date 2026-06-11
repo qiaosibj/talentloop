@@ -1,22 +1,46 @@
 "use client";
 
 import type { Embedder } from "@talentloop/core";
+import { idbGet, idbSet } from "./idb";
 
 /**
  * Client-side embedder that delegates to the server proxy (/api/embed),
  * keeping provider API keys strictly server-side.
  *
- * Vectors are cached in-memory per text, so re-running the match only
- * embeds portraits that are new or changed — repeated runs cost zero API
- * calls. (Persistent vector storage is the pgvector roadmap item.)
+ * Vectors are cached per portrait text and persisted to IndexedDB, so
+ * re-running the match — even after a page refresh — only embeds portraits
+ * that are new or changed. (pgvector is the server-side scale-up path.)
  */
+const VEC_KEY = "talentloop:vectors:v1";
+const CACHE_CAP = 5000;
+
 const vectorCache = new Map<string, number[]>();
-const CACHE_CAP = 20000;
+let cacheLoaded = false;
+
+async function ensureCacheLoaded(): Promise<void> {
+  if (cacheLoaded) return;
+  cacheLoaded = true;
+  try {
+    const stored = await idbGet<Record<string, number[]>>(VEC_KEY);
+    if (stored) for (const [k, v] of Object.entries(stored)) vectorCache.set(k, v);
+  } catch {
+    /* cold cache is fine */
+  }
+}
+
+async function persistCache(): Promise<void> {
+  try {
+    await idbSet(VEC_KEY, Object.fromEntries(vectorCache));
+  } catch (err) {
+    console.warn("vector cache persist failed", err);
+  }
+}
 
 export class ProxyEmbedder implements Embedder {
   readonly dims = 2048;
 
   async embed(texts: string[]): Promise<number[][]> {
+    await ensureCacheLoaded();
     const missing = [...new Set(texts.filter((t) => !vectorCache.has(t)))];
 
     if (missing.length > 0) {
@@ -32,6 +56,7 @@ export class ProxyEmbedder implements Embedder {
       const data = (await res.json()) as { vectors: number[][] };
       if (vectorCache.size + missing.length > CACHE_CAP) vectorCache.clear();
       missing.forEach((t, i) => vectorCache.set(t, data.vectors[i]));
+      void persistCache();
     }
 
     return texts.map((t) => vectorCache.get(t)!);

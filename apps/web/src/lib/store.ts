@@ -46,6 +46,8 @@ export interface Pool {
   candidates: PoolCandidate[];
   jobs: JdRequirement[];
   templates: OutreachTemplate[];
+  /** Bumped on every save — lets the board detect a stale last-run. */
+  version?: number;
 }
 
 const KEY = "talentloop:pool:v1";
@@ -113,9 +115,30 @@ export async function loadPool(): Promise<Pool> {
 export async function savePool(pool: Pool): Promise<void> {
   if (typeof window === "undefined") return;
   try {
+    pool.version = (pool.version ?? 0) + 1;
     await idbSet(KEY, pool);
   } catch (err) {
     console.error("savePool failed", err);
+  }
+}
+
+const BOARD_KEY = "talentloop:board:v1";
+
+/** Persist the last match run so a page refresh shows results without re-running (and re-embedding). */
+export async function saveBoardSnapshot(snapshot: unknown): Promise<void> {
+  try {
+    await idbSet(BOARD_KEY, snapshot);
+  } catch (err) {
+    console.error("saveBoardSnapshot failed", err);
+  }
+}
+
+export async function loadBoardSnapshot<T>(): Promise<T | undefined> {
+  if (typeof window === "undefined") return undefined;
+  try {
+    return await idbGet<T>(BOARD_KEY);
+  } catch {
+    return undefined;
   }
 }
 

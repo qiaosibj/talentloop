@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { Opportunity } from "@talentloop/match-engine";
-import { Pool, loadPool, resetPool } from "@/lib/store";
+import { Pool, loadBoardSnapshot, loadPool, resetPool, saveBoardSnapshot } from "@/lib/store";
 import { BoardResult, runMatch } from "@/lib/match-client";
+
+/** Persisted run result, stamped with the pool version it was computed from. */
+type StoredBoard = BoardResult & { poolVersion?: number };
 import { OpportunityCard } from "@/components/OpportunityCard";
 import { OutreachModal } from "@/components/OutreachModal";
 import { MatchDetailModal } from "@/components/MatchDetailModal";
@@ -33,27 +36,32 @@ const TIERS = [
 export function BoardClient() {
   const [pool, setPool] = useState<Pool | null>(null);
   const [jobId, setJobId] = useState<string>("");
-  const [board, setBoard] = useState<BoardResult | null>(null);
+  const [board, setBoard] = useState<StoredBoard | null>(null);
   const [matching, setMatching] = useState(false);
   const [outreachFor, setOutreachFor] = useState<Opportunity | null>(null);
   const [detailFor, setDetailFor] = useState<Opportunity | null>(null);
 
+  // On load: show the last persisted run — matching only starts on the button.
+  // (Auto-running on every visit would re-embed the pool for nothing.)
   useEffect(() => {
-    void loadPool().then((p) => {
+    void Promise.all([loadPool(), loadBoardSnapshot<StoredBoard>()]).then(([p, snapshot]) => {
       setPool(p);
-      void doMatch(p, "");
+      if (snapshot) setBoard(snapshot);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function doMatch(p: Pool, forJob: string) {
     setMatching(true);
     try {
-      setBoard(await runMatch(p, forJob || undefined));
+      const result: StoredBoard = { ...(await runMatch(p, forJob || undefined)), poolVersion: p.version };
+      setBoard(result);
+      void saveBoardSnapshot(result);
     } finally {
       setMatching(false);
     }
   }
+
+  const stale = Boolean(board && pool && board.poolVersion !== pool.version);
 
   function onReset() {
     if (!confirm("Replace your current pool with the sample data?")) return;
@@ -101,12 +109,27 @@ export function BoardClient() {
         </div>
         {board && (
           <p className="ran-note">
-            Last run: {new Date(board.ranAt).toLocaleTimeString()} · {board.opportunities.length} opportunities scored ·
+            Last run: {new Date(board.ranAt).toLocaleString()} · {board.opportunities.length} opportunities scored ·
             semantic engine: {board.embedMode}
             {board.embedMode === "offline hash" ? " (set an embedding key for real semantics)" : ""}
+            {stale && <span className="stale-hint"> ⚠ pool changed since this run — hit "Run matching"</span>}
           </p>
         )}
       </section>
+
+      {!board && (
+        <div className="board-empty">
+          <p>
+            <strong>
+              {pool.candidates.length} candidates and {pool.jobs.length} positions loaded.
+            </strong>
+          </p>
+          <p className="muted">No match run yet in this browser — click the button to score every opportunity.</p>
+          <button className="btn-primary btn-lg" onClick={() => void doMatch(pool, jobId)} disabled={matching}>
+            {matching ? "Matching…" : "▶ Run matching"}
+          </button>
+        </div>
+      )}
 
       {board && (
         <div className="columns">
