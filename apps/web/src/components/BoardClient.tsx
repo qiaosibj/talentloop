@@ -101,7 +101,9 @@ export function BoardClient() {
         </div>
         {board && (
           <p className="ran-note">
-            Last run: {new Date(board.ranAt).toLocaleTimeString()} · {board.opportunities.length} opportunities scored
+            Last run: {new Date(board.ranAt).toLocaleTimeString()} · {board.opportunities.length} opportunities scored ·
+            semantic engine: {board.embedMode}
+            {board.embedMode === "offline hash" ? " (set an embedding key for real semantics)" : ""}
           </p>
         )}
       </section>

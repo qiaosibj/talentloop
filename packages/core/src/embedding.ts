@@ -62,6 +62,12 @@ export interface OpenAIEmbedderConfig {
   model?: string;
   baseUrl?: string;
   dims?: number;
+  /**
+   * Endpoint path appended to baseUrl. Default "/v1/embeddings" (OpenAI).
+   * Some providers use a different prefix — e.g. Zhipu: baseUrl
+   * "https://open.bigmodel.cn/api/paas/v4" with path "/embeddings".
+   */
+  path?: string;
 }
 
 /** OpenAI-compatible embeddings endpoint adapter. */
@@ -73,7 +79,7 @@ export class OpenAIEmbedder implements Embedder {
   }
 
   async embed(texts: string[]): Promise<number[][]> {
-    const res = await fetch(`${this.cfg.baseUrl ?? "https://api.openai.com"}/v1/embeddings`, {
+    const res = await fetch(`${this.cfg.baseUrl ?? "https://api.openai.com"}${this.cfg.path ?? "/v1/embeddings"}`, {
       method: "POST",
       headers: {
         "content-type": "application/json",

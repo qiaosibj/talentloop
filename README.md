@@ -53,9 +53,22 @@ data/synthetic/  generated sample candidates & jobs — no real personal data
 docs/            architecture & design notes
 ```
 
+## AI configuration
+
+Everything works without keys (offline demo mode). Add env vars to unlock real AI — locally in `apps/web/.env.local`, on Vercel via project settings:
+
+| Variable | Unlocks | Examples |
+|---|---|---|
+| `ANTHROPIC_API_KEY` (+ `ANTHROPIC_MODEL`) | Chat, resume/JD parsing, outreach rewrite | Claude |
+| `OPENAI_API_KEY` + `OPENAI_BASE_URL` + `OPENAI_MODEL` | Same, via any OpenAI-compatible endpoint | OpenAI, DeepSeek (`https://api.deepseek.com`, `deepseek-chat`), Qwen (`https://dashscope.aliyuncs.com/compatible-mode`, `qwen-plus`) |
+| `ZHIPU_API_KEY` (+ `ZHIPU_EMBED_MODEL`) | Real semantic matching (Zhipu `embedding-3`, multilingual) via the server-side `/api/embed` proxy — keys never reach the browser | Zhipu |
+| `EMBEDDING_API_KEY` + `EMBEDDING_BASE_URL` + `EMBEDDING_MODEL` | Same, via any OpenAI-compatible embeddings endpoint | OpenAI `text-embedding-3-small` |
+
+With an embedding key set, the board switches from the offline hash engine to neural embeddings automatically (thresholds re-calibrate via `NEURAL_EMBEDDER_CONFIG`); if the provider errors mid-run it falls back to offline and keeps working.
+
 ## Deploy (Vercel)
 
-Import the repo, set **Root Directory** to `apps/web` (keep "Include files outside root" on). The build script compiles the workspace packages first. Optionally add `ANTHROPIC_API_KEY` as an environment variable to enable the real AI interviewer.
+Import the repo, set **Root Directory** to `apps/web` (keep "Include files outside root" on). The build script compiles the workspace packages first. Add the env vars above to enable real AI.
 
 ## Roadmap
 
