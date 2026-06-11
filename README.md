@@ -2,6 +2,8 @@
 
 > Turn every resume a company has ever received into a living talent asset.
 
+**🔗 Live demo: [talentloop-web.vercel.app](https://talentloop-web.vercel.app)** — sample data preloaded, runs entirely in your browser, no signup. Real AI (conversation, parsing) is enabled with rate-limited keys; matching uses multilingual embeddings.
+
 AI recruiting toolkit for small and mid-sized companies: structured resume/JD parsing, **reverse talent-pool matching** ("which dormant candidates fit the jobs I have open *today*?"), and conversational profile extraction — designed GDPR-first and human-in-the-loop.
 
 **Status:** Phase 1 — core engine packages with an offline runnable demo. All data in this repo is synthetic.
