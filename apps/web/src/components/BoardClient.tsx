@@ -7,6 +7,9 @@ import { BoardResult, runMatch } from "@/lib/match-client";
 
 /** Persisted run result, stamped with the pool version it was computed from. */
 type StoredBoard = BoardResult & { poolVersion?: number };
+
+/** Cards shown per tier on the board; the rest live in the tier list page. */
+const TIER_PREVIEW = 5;
 import { OpportunityCard } from "@/components/OpportunityCard";
 import { OutreachModal } from "@/components/OutreachModal";
 import { MatchDetailModal } from "@/components/MatchDetailModal";
@@ -142,7 +145,7 @@ export function BoardClient() {
                 <p>{tier.hint}</p>
               </header>
               {board.byTier[tier.key].length === 0 && <p className="empty">No candidates in this tier.</p>}
-              {board.byTier[tier.key].map((opp) => (
+              {board.byTier[tier.key].slice(0, TIER_PREVIEW).map((opp) => (
                 <OpportunityCard
                   key={`${opp.personId}:${opp.jdId}`}
                   opp={opp}
@@ -151,6 +154,11 @@ export function BoardClient() {
                   engagementStatus={findCandidate(pool, opp.personId)?.engagement?.status}
                 />
               ))}
+              {board.byTier[tier.key].length > TIER_PREVIEW && (
+                <a className="view-all" href={`/board/${tier.key}`}>
+                  View all {board.byTier[tier.key].length} →
+                </a>
+              )}
             </section>
           ))}
         </div>
