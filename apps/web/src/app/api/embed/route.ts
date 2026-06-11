@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Embedder, OpenAIEmbedder } from "@talentloop/core";
+import { guard } from "@/lib/ratelimit";
 
 /**
  * Server-side embedding proxy: the matching engine runs in the browser,
@@ -42,7 +43,7 @@ export async function GET(): Promise<NextResponse> {
 }
 
 const BATCH_SIZE = 16; // stay under provider batch limits (Zhipu: 64)
-const MAX_TEXTS = 2048;
+const MAX_TEXTS = 300; // per request — the client chunks larger pools
 const MAX_CHARS = 3000; // keep well under embedding token limits
 
 export async function POST(req: Request): Promise<NextResponse> {
@@ -56,6 +57,10 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (!Array.isArray(texts) || texts.length === 0 || texts.length > MAX_TEXTS) {
     return NextResponse.json({ error: `Provide { texts: string[] } (1–${MAX_TEXTS} items)` }, { status: 400 });
   }
+
+  // Abuse protection: budget is counted in texts, not requests.
+  const limited = guard(req, { name: "embed", perIp: 40, windowMs: 10 * 60_000, dailyMax: 20_000, amount: texts.length });
+  if (limited) return limited;
 
   const { embedder, mode } = serverEmbedder();
   if (!embedder) {

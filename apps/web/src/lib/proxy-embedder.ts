@@ -44,18 +44,24 @@ export class ProxyEmbedder implements Embedder {
     const missing = [...new Set(texts.filter((t) => !vectorCache.has(t)))];
 
     if (missing.length > 0) {
-      const res = await fetch("/api/embed", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ texts: missing }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? `Embedding proxy error ${res.status}`);
+      // Chunk to respect the server's per-request cap.
+      const CHUNK = 250;
+      const vectors: number[][] = [];
+      for (let i = 0; i < missing.length; i += CHUNK) {
+        const res = await fetch("/api/embed", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ texts: missing.slice(i, i + CHUNK) }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error ?? `Embedding proxy error ${res.status}`);
+        }
+        const data = (await res.json()) as { vectors: number[][] };
+        vectors.push(...data.vectors);
       }
-      const data = (await res.json()) as { vectors: number[][] };
       if (vectorCache.size + missing.length > CACHE_CAP) vectorCache.clear();
-      missing.forEach((t, i) => vectorCache.set(t, data.vectors[i]));
+      missing.forEach((t, i) => vectorCache.set(t, vectors[i]));
       void persistCache();
     }
 

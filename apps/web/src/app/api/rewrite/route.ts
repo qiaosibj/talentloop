@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { selectLlm } from "@/lib/llm";
+import { guard } from "@/lib/ratelimit";
 
 /**
  * AI rewrite for outreach messages: keeps facts and the link, improves tone.
@@ -15,6 +16,10 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
   const text = (body.text ?? "").trim();
   if (!text) return NextResponse.json({ error: "Provide { text }" }, { status: 400 });
+  if (text.length > 4000) return NextResponse.json({ error: "Text too long (max 4000 characters)" }, { status: 400 });
+
+  const limited = guard(req, { name: "rewrite", perIp: 15, windowMs: 10 * 60_000, dailyMax: 500 });
+  if (limited) return limited;
 
   const { llm, mode } = selectLlm();
   if (mode === "demo") {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { parseResume } from "@talentloop/resume-parser";
 import { parseJd } from "@talentloop/jd-parser";
 import { selectLlm } from "@/lib/llm";
+import { guard } from "@/lib/ratelimit";
 
 /**
  * AI parsing endpoint: raw resume / JD text → structured object.
@@ -22,6 +23,9 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (!text || (body.kind !== "resume" && body.kind !== "jd")) {
     return NextResponse.json({ error: "Provide { kind: 'resume' | 'jd', text }" }, { status: 400 });
   }
+
+  const limited = guard(req, { name: "parse", perIp: 15, windowMs: 10 * 60_000, dailyMax: 500 });
+  if (limited) return limited;
 
   const { llm, mode } = selectLlm();
   if (mode === "demo") {

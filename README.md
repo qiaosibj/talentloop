@@ -66,6 +66,8 @@ Everything works without keys (offline demo mode). Add env vars to unlock real A
 
 With an embedding key set, the board switches from the offline hash engine to neural embeddings automatically (thresholds re-calibrate via `NEURAL_EMBEDDER_CONFIG`); if the provider errors mid-run it falls back to offline and keeps working.
 
+**Abuse protection** (so a public demo with real keys can't be quota-drained): every AI endpoint enforces per-request size caps, per-IP rate limits and a global daily budget (embeddings are budgeted per text, ~20k/day by default). Limits return an honest 429. Set `DISABLE_RATE_LIMITS=1` to switch them off locally. State is in-memory per instance — a deterrent for demos; back it with Redis for production.
+
 ## Deploy (Vercel)
 
 Import the repo, set **Root Directory** to `apps/web` (keep "Include files outside root" on). The build script compiles the workspace packages first. Add the env vars above to enable real AI.

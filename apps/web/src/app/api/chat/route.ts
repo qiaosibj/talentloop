@@ -3,6 +3,10 @@ import { ChatState } from "@talentloop/chat-extractor";
 import type { ResumeProfile } from "@talentloop/resume-parser";
 import type { JdRequirement } from "@talentloop/jd-parser";
 import { buildInterviewer } from "@/lib/interview";
+import { guard } from "@/lib/ratelimit";
+
+const MAX_MESSAGE_CHARS = 1200;
+const MAX_HISTORY_TURNS = 60;
 
 /**
  * Stateless chat endpoint: the client owns the talent pool (local-first)
@@ -29,6 +33,16 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (!candidate?.id || !jd?.id || !jd.title) {
     return NextResponse.json({ error: "Provide { candidate, jd }" }, { status: 400 });
   }
+  if (body.message && body.message.length > MAX_MESSAGE_CHARS) {
+    return NextResponse.json({ error: `Message too long (max ${MAX_MESSAGE_CHARS} characters)` }, { status: 400 });
+  }
+  if (body.state && body.state.history.length > MAX_HISTORY_TURNS) {
+    return NextResponse.json({ error: "This conversation is too long — please start over." }, { status: 400 });
+  }
+
+  // Abuse protection: each turn costs two LLM calls.
+  const limited = guard(req, { name: "chat", perIp: 40, windowMs: 10 * 60_000, dailyMax: 2_000 });
+  if (limited) return limited;
 
   const { extractor, context, mode } = buildInterviewer(candidate, jd);
 
