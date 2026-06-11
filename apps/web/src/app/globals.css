@@ -1137,3 +1137,254 @@ select {
   max-height: 200px;
   overflow-y: auto;
 }
+
+/* ---------- landing ---------- */
+.landing {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px 12px;
+}
+
+.landing-hero {
+  text-align: center;
+  padding: 64px 12px 56px;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 5px 14px;
+  border-radius: 999px;
+  margin-bottom: 22px;
+}
+
+.landing-hero h1 {
+  margin: 0 0 18px;
+  font-size: 38px;
+  line-height: 1.18;
+  letter-spacing: -0.8px;
+}
+
+@media (max-width: 720px) {
+  .landing-hero h1 {
+    font-size: 27px;
+  }
+}
+
+.hl {
+  color: var(--accent);
+}
+
+.hero-sub {
+  max-width: 660px;
+  margin: 0 auto 28px;
+  color: var(--ink-600);
+  font-size: 16px;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-lg {
+  font-size: 15px;
+  padding: 12px 22px;
+}
+
+.landing-section {
+  padding: 34px 0;
+  border-top: 1px solid var(--line);
+}
+
+.landing-section h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  letter-spacing: -0.3px;
+}
+
+.section-sub {
+  color: var(--ink-400);
+  font-size: 13.5px;
+  margin: 0 0 18px;
+}
+
+.landing-cards {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.landing-cards.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 860px) {
+  .landing-cards.three {
+    grid-template-columns: 1fr;
+  }
+}
+
+.l-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.l-icon {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.l-card strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14.5px;
+}
+
+.l-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-600);
+}
+
+/* loop steps */
+.loop-steps {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+@media (max-width: 920px) {
+  .loop-steps {
+    flex-direction: column;
+  }
+  .loop-arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+}
+
+.loop-step {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  position: relative;
+}
+
+.loop-num {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.loop-step strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.loop-step p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-600);
+}
+
+.loop-arrow {
+  align-self: center;
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.loop-note {
+  margin: 16px 0 0;
+  font-size: 13.5px;
+  color: var(--ink-600);
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+/* guided tour */
+.tour-list {
+  list-style: none;
+  counter-reset: tour;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tour-list li {
+  counter-increment: tour;
+}
+
+.tour-list a {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: var(--ink-900);
+  transition: border-color 0.15s;
+}
+
+.tour-list a::before {
+  content: counter(tour);
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--gray-soft);
+  color: var(--ink-600);
+  font-weight: 700;
+  font-size: 12.5px;
+  align-self: center;
+}
+
+.tour-list a:hover {
+  border-color: var(--accent);
+}
+
+.tour-list a:hover::before {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tour-list strong {
+  display: block;
+  font-size: 14.5px;
+  white-space: nowrap;
+}
+
+.tour-list span {
+  font-size: 12.5px;
+  color: var(--ink-600);
+}

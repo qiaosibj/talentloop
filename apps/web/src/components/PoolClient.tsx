@@ -121,7 +121,7 @@ export function PoolClient() {
         <h1>Candidate pool</h1>
         <p>
           {pool.candidates.length} candidates, stored only in this browser (IndexedDB). Import a spreadsheet, paste a
-          resume, or use the quick form — then <a href="/">run matching</a>.
+          resume, or use the quick form — then <a href="/board">run matching</a>.
         </p>
         <div className="toolbar">
           <button className="btn-primary" onClick={() => setImporting(true)}>

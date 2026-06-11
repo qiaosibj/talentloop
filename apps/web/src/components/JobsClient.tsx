@@ -110,7 +110,7 @@ export function JobsClient() {
         <h1>Open positions</h1>
         <p>
           {pool.jobs.length} positions. Add a job by pasting the JD (AI parsing) or with the quick form, then{" "}
-          <a href="/">run matching</a> to see who in your pool fits it.
+          <a href="/board">run matching</a> to see who in your pool fits it.
         </p>
       </section>
 

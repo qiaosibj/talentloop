@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Talent<span>Loop</span>
           </a>
           <nav className="main-nav">
-            <a href="/">Board</a>
+            <a href="/board">Board</a>
             <a href="/pool">Candidates</a>
             <a href="/jobs">Jobs</a>
             <a href="https://github.com/qiaosibj/talentloop" target="_blank" rel="noreferrer">

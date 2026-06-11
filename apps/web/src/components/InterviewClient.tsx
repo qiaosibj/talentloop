@@ -23,7 +23,7 @@ export function InterviewClient({ personId, jdId }: { personId: string; jdId: st
     return (
       <main className="interview">
         <p className="empty">
-          Unknown candidate or job in this browser's pool. Go back to the <a href="/">board</a> and pick an
+          Unknown candidate or job in this browser's pool. Go back to the <a href="/board">board</a> and pick an
           opportunity.
         </p>
       </main>
