@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ResumeProfile } from "@talentloop/resume-parser";
-import { Pool, PoolCandidate, loadPool, newId, savePool } from "@/lib/store";
+import { Pool, PoolCandidate, consentRemainingMs, loadPool, newId, savePool, withdrawConsent } from "@/lib/store";
 import { ImportModal } from "@/components/ImportModal";
 import { CandidateDetail } from "@/components/CandidateDetail";
 import { Toast } from "@/components/Toast";
@@ -201,6 +201,7 @@ export function PoolClient() {
                       · {relTime(c.engagement.at)}
                     </span>
                   )}
+                  {consentBadge(c)}
                   <span className="details-hint">details ›</span>
                 </div>
                 <button className="btn-ghost danger" onClick={() => removeCandidate(c.id)}>
@@ -221,7 +222,18 @@ export function PoolClient() {
                 ✕
               </button>
             </header>
-            <CandidateDetail candidate={viewing} />
+            <CandidateDetail
+              candidate={viewing}
+              onWithdraw={() => {
+                void withdrawConsent(viewing.id).then(() =>
+                  loadPool().then((p) => {
+                    setPool(p);
+                    setViewing(p.candidates.find((c) => c.id === viewing.id) ?? null);
+                    setToast(`Withdrawal recorded for ${viewing.basics.name ?? viewing.id}.`);
+                  }),
+                );
+              }}
+            />
           </div>
         </div>
       )}
@@ -259,4 +271,15 @@ function relTime(ts: number): string {
   const hours = Math.round(mins / 60);
   if (hours < 24) return `${hours}h ago`;
   return `${Math.round(hours / 24)}d ago`;
+}
+
+function consentBadge(c: PoolCandidate) {
+  if (!c.consent) return null;
+  if (c.consent.status === "granted") {
+    const remaining = consentRemainingMs(c.consent);
+    const months = remaining !== undefined ? Math.max(0, Math.round(remaining / (30 * 24 * 60 * 60 * 1000))) : null;
+    return <span className="badge-consent ok">🔒 in pool{months !== null ? ` · ${months}mo left` : ""}</span>;
+  }
+  if (c.consent.status === "declined") return <span className="badge-consent off">declined</span>;
+  return <span className="badge-consent off">withdrawn</span>;
 }

@@ -44,6 +44,7 @@ The web app is a working product loop, not a static showcase:
 5. **You always know where data came from.** Anything the AI inferred is stored separately and clearly labeled, never mixed with what the candidate actually wrote — required for GDPR access requests and EU AI Act explainability.
 6. **Humans decide.** The engine ranks and explains; it never auto-rejects anyone. Every suggestion comes with plain-language reasons a recruiter can verify.
 7. **Cut-offs are calibration, not magic numbers.** Similarity scores mean different things depending on the embedding model, so thresholds ship as per-model calibration profiles.
+8. **Compliance is a product feature, not an afterthought.** A bare reply to outreach is not valid GDPR consent (it isn't specific or informed). So the activation conversation ends with an *explicit, logged* consent step — the candidate is told exactly what they're agreeing to (kept in the pool for N months), can decline, and can withdraw any time. Retention consent gates future matching: declined, withdrawn or expired candidates are excluded automatically. This turns a dormant pool from a liability into a consented asset.
 
 ## Repo layout
 

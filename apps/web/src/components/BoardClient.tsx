@@ -115,6 +115,12 @@ export function BoardClient() {
             Last run: {new Date(board.ranAt).toLocaleString()} · {board.opportunities.length} opportunities scored ·
             semantic engine: {board.embedMode}
             {board.embedMode === "offline hash" ? " (set an embedding key for real semantics)" : ""}
+            {board.excludedForConsent > 0 && (
+              <span className="consent-note">
+                {" "}
+                · 🔒 {board.excludedForConsent} excluded (no retention consent)
+              </span>
+            )}
             {stale && <span className="stale-hint"> ⚠ pool changed since this run — hit "Run matching"</span>}
           </p>
         )}

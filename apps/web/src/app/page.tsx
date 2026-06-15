@@ -84,8 +84,8 @@ export default function LandingPage() {
             <span className="loop-num">4</span>
             <strong>The pool updates itself</strong>
             <p>
-              Candidates answer a short AI conversation, unlock the job, apply with a refreshed resume — and everything
-              flows back into the pool for the next match.
+              Candidates answer a short AI conversation, unlock the job, apply with a refreshed resume — and give
+              explicit, logged consent to stay in the pool. Everything flows back for the next match.
             </p>
           </div>
         </div>

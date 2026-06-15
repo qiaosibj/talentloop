@@ -1782,3 +1782,82 @@ select {
 .legal strong {
   color: var(--ink-900);
 }
+
+/* ---------- consent (the compliance-as-product feature) ---------- */
+.consent-card {
+  border: 1.5px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 6px;
+}
+
+.consent-card strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.consent-card p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--ink-600);
+  line-height: 1.55;
+}
+
+.consent-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.consent-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.consent-declined {
+  background: var(--gray-soft);
+  color: var(--ink-600);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.consent-box {
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.consent-box p {
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+
+.badge-consent {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge-consent.ok {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge-consent.off {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.consent-note {
+  color: var(--accent);
+  font-weight: 600;
+}

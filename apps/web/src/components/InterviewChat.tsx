@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ResumeProfile } from "@talentloop/resume-parser";
 import type { JdRequirement } from "@talentloop/jd-parser";
 import { INITIAL_QUICK_REPLIES, UNLOCK_AT } from "@/lib/interview";
-import { recordEngagement } from "@/lib/store";
+import { DEFAULT_RETENTION_MONTHS, recordConsent, recordEngagement } from "@/lib/store";
 import { ApplyModal } from "@/components/ApplyModal";
 
 interface ChatTurn {
@@ -46,6 +46,7 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
   const [error, setError] = useState("");
   const [applied, setApplied] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [consent, setConsent] = useState<"granted" | "declined" | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const openedRef = useRef(false);
   const recordedRef = useRef(false);
@@ -127,6 +128,16 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
     recordedRef.current = true;
   }
 
+  // The activation conversation's final step: explicit, informed consent to
+  // stay in the talent pool. A bare reply isn't valid consent — this is.
+  const needsConsent = (state.done || applied) && consent === null;
+  const companyName = jd.company ?? "the company";
+
+  async function decideConsent(decision: "granted" | "declined") {
+    setConsent(decision);
+    await recordConsent(candidate.id, decision, jd.title);
+  }
+
   const salary =
     jd.offer.salaryMin || jd.offer.salaryMax
       ? `${jd.offer.salaryMin?.toLocaleString() ?? "?"}–${jd.offer.salaryMax?.toLocaleString() ?? "?"} ${jd.offer.currency ?? "EUR"}/yr`
@@ -169,6 +180,41 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
           {applied && (
             <div className="done-card">
               🎉 Application sent! The recruiter sees your conversation summary alongside it — no forms to fill twice.
+            </div>
+          )}
+
+          {/* Explicit, informed talent-pool consent — the legal heart of the loop */}
+          {needsConsent && (
+            <div className="consent-card">
+              <strong>📋 One last thing — your data, your choice</strong>
+              <p>
+                May {companyName} keep your profile in its talent pool for{" "}
+                <strong>{DEFAULT_RETENTION_MONTHS} months</strong>, to reach out when a relevant role opens? You can
+                withdraw at any time, and we&apos;ll only ever use it to suggest matching positions.
+              </p>
+              <div className="consent-actions">
+                <button className="btn-primary" onClick={() => void decideConsent("granted")}>
+                  Yes, keep me in the pool
+                </button>
+                <button className="btn-ghost" onClick={() => void decideConsent("declined")}>
+                  No, just this application
+                </button>
+              </div>
+              <a className="consent-link" href="/legal" target="_blank" rel="noreferrer">
+                How your data is handled →
+              </a>
+            </div>
+          )}
+
+          {consent === "granted" && (
+            <div className="done-card">
+              ✓ Thanks — you&apos;re in {companyName}&apos;s talent pool for {DEFAULT_RETENTION_MONTHS} months. You can
+              withdraw any time.
+            </div>
+          )}
+          {consent === "declined" && (
+            <div className="consent-declined">
+              Understood — we&apos;ll only use your details for this application and won&apos;t keep you in the pool.
             </div>
           )}
         </div>

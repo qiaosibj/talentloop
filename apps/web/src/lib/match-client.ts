@@ -8,7 +8,7 @@ import {
   Opportunity,
 } from "@talentloop/match-engine";
 import { ProxyEmbedder } from "./proxy-embedder";
-import type { Pool } from "./store";
+import { isRetainable, type Pool } from "./store";
 
 /**
  * Matching runs in the browser. Vectorization uses the best available
@@ -24,6 +24,8 @@ export interface BoardResult {
   ranAt: number;
   /** Which semantic engine produced this run, e.g. "zhipu embedding-3" or "offline hash". */
   embedMode: string;
+  /** Candidates excluded from this run because they declined/withdrew/expired consent. */
+  excludedForConsent: number;
 }
 
 let capabilityCache: Promise<string> | null = null;
@@ -59,11 +61,18 @@ async function runWith(
   config: typeof NEURAL_EMBEDDER_CONFIG,
   embedMode: string,
 ): Promise<BoardResult> {
+  // Consent gate: candidates who declined, withdrew, or whose retention
+  // window lapsed are excluded from matching — the lawful basis to keep
+  // working with their data is gone.
+  const eligible = pool.candidates.filter(isRetainable);
+  const excludedForConsent = pool.candidates.length - eligible.length;
+
   const engine = new MatchEngine({ embedder, config });
-  await engine.index({ profiles: pool.candidates, jds: pool.jobs });
+  await engine.index({ profiles: eligible, jds: pool.jobs });
   const opportunities = jobId ? engine.matchJd(jobId) : engine.reactivationBoard();
   return {
     opportunities,
+    excludedForConsent,
     byTier: {
       optimal: opportunities.filter((o) => o.tier === "optimal"),
       probe: opportunities.filter((o) => o.tier === "probe"),

@@ -1,8 +1,46 @@
-import type { PoolCandidate } from "@/lib/store";
+import { consentRemainingMs, type PoolCandidate } from "@/lib/store";
 
 function fmtRange(start?: string, end?: string): string {
   if (!start && !end) return "";
   return `${start ?? "?"} – ${end === "present" ? "now" : (end ?? "?")}`;
+}
+
+function ConsentSection({ candidate, onWithdraw }: { candidate: PoolCandidate; onWithdraw?: () => void }) {
+  const c = candidate.consent;
+  if (!c) return null;
+  const remaining = consentRemainingMs(c);
+  const months = remaining !== undefined ? Math.max(0, Math.round(remaining / (30 * 24 * 60 * 60 * 1000))) : null;
+  const expiry = new Date(c.at + c.retentionMonths * 30 * 24 * 60 * 60 * 1000);
+
+  return (
+    <section className="detail-section consent-box">
+      <h4>Talent-pool consent</h4>
+      {c.status === "granted" && (
+        <>
+          <p>
+            <strong>✓ Consented</strong> to {c.retentionMonths}-month retention on {new Date(c.at).toLocaleDateString()}.
+            {months !== null && months > 0 ? ` Expires in ~${months} month${months === 1 ? "" : "s"} (${expiry.toLocaleDateString()}).` : ` Retention window has lapsed (${expiry.toLocaleDateString()}) — delete or re-consent.`}
+          </p>
+          {onWithdraw && (
+            <button className="btn-ghost danger" onClick={onWithdraw}>
+              Record withdrawal & remove from future matching
+            </button>
+          )}
+        </>
+      )}
+      {c.status === "declined" && (
+        <p>
+          <strong>Declined</strong> talent-pool retention on {new Date(c.at).toLocaleDateString()} — kept only for the
+          original application, excluded from future matching.
+        </p>
+      )}
+      {c.status === "withdrawn" && (
+        <p>
+          <strong>Withdrawn</strong> on {new Date(c.at).toLocaleDateString()} — excluded from future matching.
+        </p>
+      )}
+    </section>
+  );
 }
 
 const ANSWER_LABELS: Record<string, string> = {
@@ -13,10 +51,17 @@ const ANSWER_LABELS: Record<string, string> = {
   salaryExpectation: "Salary expectation",
 };
 
-export function CandidateDetail({ candidate }: { candidate: PoolCandidate }) {
+export function CandidateDetail({
+  candidate,
+  onWithdraw,
+}: {
+  candidate: PoolCandidate;
+  onWithdraw?: () => void;
+}) {
   const b = candidate.basics;
   return (
     <div className="detail">
+      <ConsentSection candidate={candidate} onWithdraw={onWithdraw} />
       {candidate.engagement && (
         <section className="detail-section engagement-box">
           <h4>

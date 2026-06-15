@@ -35,12 +35,51 @@ export interface CandidateEngagement {
   resumeUpdated?: boolean;
 }
 
+/**
+ * Talent-pool consent record — the heart of "compliance as a product feature".
+ *
+ * A bare reply to outreach is NOT valid GDPR consent (it isn't specific or
+ * informed). So retention in the pool is governed by an explicit, logged
+ * consent captured during the activation conversation: the candidate is told
+ * exactly what they're agreeing to (kept in the pool for N months to be
+ * matched against future roles), can decline, and can withdraw any time.
+ * Everything is timestamped for an audit trail.
+ */
+export interface ConsentRecord {
+  status: "granted" | "declined" | "withdrawn";
+  /** When the current status was set. */
+  at: number;
+  /** Retention window the candidate agreed to, in months (from `at`). */
+  retentionMonths: number;
+  /** Where the consent ask happened, e.g. the job that prompted it. */
+  source: string;
+}
+
 export type PoolCandidate = ResumeProfile & {
   engagement?: CandidateEngagement;
   /** Raw resume text submitted with an application, awaiting AI parsing (demo mode without an API key). */
   rawResumeText?: string;
   resumeUpdatedAt?: number;
+  /** Talent-pool retention consent. Absent = legacy/sample data (no explicit consent on record). */
+  consent?: ConsentRecord;
 };
+
+export const DEFAULT_RETENTION_MONTHS = 12;
+
+/** Ms remaining until a granted consent expires; negative if already past. Undefined if no live consent. */
+export function consentRemainingMs(consent?: ConsentRecord): number | undefined {
+  if (!consent || consent.status !== "granted") return undefined;
+  const expiry = consent.at + consent.retentionMonths * 30 * 24 * 60 * 60 * 1000;
+  return expiry - Date.now();
+}
+
+/** Whether this candidate may stay in the pool for future matching. */
+export function isRetainable(c: PoolCandidate): boolean {
+  if (!c.consent) return true; // sample/legacy data — not gated in the demo
+  if (c.consent.status !== "granted") return false;
+  const remaining = consentRemainingMs(c.consent);
+  return remaining === undefined ? true : remaining > 0;
+}
 
 export interface Pool {
   candidates: PoolCandidate[];
@@ -212,6 +251,37 @@ export async function recordApplication(
   candidate.engagement = { ...engagement, status: "applied", resumeUpdated: Boolean(resume) };
   const salary = parseSalaryText(engagement.answers.salaryExpectation);
   if (salary) candidate.intention = { ...candidate.intention, salaryMin: salary };
+  await savePool(pool);
+}
+
+/**
+ * Record the candidate's talent-pool consent decision (the explicit,
+ * informed step at the end of the activation conversation).
+ */
+export async function recordConsent(
+  candidateId: string,
+  decision: "granted" | "declined",
+  source: string,
+  retentionMonths = DEFAULT_RETENTION_MONTHS,
+): Promise<void> {
+  const pool = await loadPool();
+  const candidate = pool.candidates.find((c) => c.id === candidateId);
+  if (!candidate) return;
+  candidate.consent = { status: decision, at: Date.now(), retentionMonths, source };
+  await savePool(pool);
+}
+
+/** Candidate-initiated withdrawal, or recruiter-side removal honoring a request. */
+export async function withdrawConsent(candidateId: string): Promise<void> {
+  const pool = await loadPool();
+  const candidate = pool.candidates.find((c) => c.id === candidateId);
+  if (!candidate) return;
+  candidate.consent = {
+    status: "withdrawn",
+    at: Date.now(),
+    retentionMonths: candidate.consent?.retentionMonths ?? DEFAULT_RETENTION_MONTHS,
+    source: candidate.consent?.source ?? "withdrawal",
+  };
   await savePool(pool);
 }
 
