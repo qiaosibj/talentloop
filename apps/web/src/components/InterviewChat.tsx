@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ResumeProfile } from "@talentloop/resume-parser";
 import type { JdRequirement } from "@talentloop/jd-parser";
-import { INITIAL_QUICK_REPLIES, UNLOCK_AT } from "@/lib/interview";
+import { INITIAL_QUICK_REPLIES, UNLOCK_AT, quickRepliesFor } from "@/lib/interview";
 import { DEFAULT_RETENTION_MONTHS, recordConsent, recordEngagement } from "@/lib/store";
 import { ApplyModal } from "@/components/ApplyModal";
 
@@ -116,7 +116,9 @@ export function InterviewChat({ candidate, jd }: { candidate: ResumeProfile; jd:
     const data = await callApi({ state, message });
     if (data) {
       setState(data.state);
-      setQuickReplies(data.quickReplies);
+      // Deterministic quick replies matched to the next unanswered question —
+      // never the model's (it lags a question behind).
+      setQuickReplies(data.state.done ? [] : quickRepliesFor(data.state.profile));
       setMode(data.mode);
     }
   }
